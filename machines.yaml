@@ -1,0 +1,39 @@
+# The format of a machine is:
+#
+# state_name
+#   match actions...
+#
+# the default is to emit, so, in any of these states, if nothing matches,
+# the character is added to the emit buffer and the parser continues.
+# if you provide no actions, or push the current state without emit'ing or drop'ing,
+# you'll enter an infinite loop, because a match without an emit or drop will
+# be reprocessed after its actions are executed
+bibtex: >
+  ROOT
+    @ push:inside
+  pubtype
+    { pop
+  citekey
+    , pop
+  inside
+    @ emit push:pubtype
+    { emit push:citekey
+    } emit pop
+    , drop
+    /[a-zA-Z]/ push:field
+  field
+    /\s|=/ pop push:eq
+  eq
+    /[{"]/ pop push:value
+  value
+    { emit push:brace
+    " drop push:quote
+    . pop
+  brace
+    { emit push:brace
+    } emit pop
+  quote
+    " drop pop
+    \ drop push:escape
+  escape
+    . emit pop

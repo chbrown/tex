@@ -1,0 +1,30 @@
+{
+  "name": "tex",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/chbrown/tex",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chbrown/tex.git"
+  },
+  "bugs": {
+    "email": "Christopher Brown <io@henrian.com>",
+    "url": "http://github.com/chbrown/tex/issues"
+  },
+  "license": "MIT",
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "dependencies": {
+    "async": "*",
+    "js-yaml": "*",
+    "optimist": "*",
+    "streaming": "*",
+    "underscore": "*"
+  },
+  "devDependencies": {
+  },
+  "bin": {
+  },
+  "scripts": {
+  }
+}
