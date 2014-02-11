@@ -1,5 +1,15 @@
 # tex
 
+Currently this project only contains a lexer for BibTeX and very simple TeX stacks.
+
+Right now it's Node.js-dependent, but I have plans for a pure version.
+
+It's similar to [docx-tex](https://github.com/chbrown/docx-tex).
+
+Open an issue, let me know what you want.
+
+
+
 ## Installation
 
 **From npm:**
