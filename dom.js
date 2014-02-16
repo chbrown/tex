@@ -41,7 +41,6 @@ TeX.parse = function(string) {
       buf = '';
     }
   };
-  // var top = root;
   for (var i = 0, l = string.length; i < l; i++) {
     var c = string.charAt(i);
     if (c === '{') {
@@ -53,8 +52,14 @@ TeX.parse = function(string) {
     }
     else if (c === '}') {
       flush();
+      // in V8: ([] ? 'y' : 'n') == 'y'
       var child = stack.pop();
-      stack.top.push(child);
+      if (stack.top) {
+        stack.top.push(child);
+      }
+      else {
+        console.error('Cannot append item to top of empty stack');
+      }
     }
     else {
       buf += c;
@@ -64,16 +69,20 @@ TeX.parse = function(string) {
   // maybe throw an error if stack.length > 1 ?
   // otherwise, it will autoclose, i.e., add as many }'s
   // at the end as it needs to for it to make sense
-  return stack.root;
+  // is this default sane?
+  return stack.root || new TeX();
 };
 TeX.prototype.push = function(child) {
   this.children.push(child);
 };
 TeX.prototype.toString = function() {
-  // in V8: [].join('') === ''
-  return '{' + this.children.map(function(child) {
+  return '{' + this.toNakedString() + '}';
+};
+TeX.prototype.toNakedString = function() {
+  // in V8: [].join('') === '', which is convenient because we want {} for empty cases
+  return this.children.map(function(child) {
     return child.toString();
-  }).join('') + '}';
+  }).join('');
 };
 TeX.prototype.normalize = function() {
   // return the nearest node with multiple children,
@@ -97,7 +106,7 @@ var Reference = exports.Reference = function(type, key, tags) {
   */
   this.type = type; // 'pubtype'
   this.key = key; // 'citekey'
-  this.tags = tags || []; // ['field', 'value'] tuples. 'value' should be a TeX instance.
+  this.tags = tags || []; // list of ReferenceTag objects. tags[i].value should be a TeX instance.
 };
 Reference.prototype.toBibTeX = function(opts) {
   // returns a formatted String
@@ -113,6 +122,15 @@ Reference.prototype.toBibTeX = function(opts) {
   var post_lines = ['}'];
   var lines = pre_lines.concat(tag_lines).concat(post_lines);
   return lines.join(opts.newline);
+};
+Reference.prototype.getTag = function(key) {
+  /** Return the accompany stringified value for the tag with a key of "key", or null */
+  for (var i = 0; i < this.tags.length; i++) {
+    if (this.tags[i].key == key) {
+      return this.tags[i].value;
+    }
+  }
+  return null;
 };
 Reference.prototype.toString = function() {
   return this.toBibTeX();

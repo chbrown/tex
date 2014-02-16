@@ -22,18 +22,21 @@ bibtex: >
     , drop
     /[a-zA-Z]/ push:field
   field
-    /\s|=/ pop push:eq
+    /\s|=/ drop pop push:eq
   eq
-    /[{"]/ pop push:value
+    = emit
+    { pop push:value emit push:brace
+    " pop push:value drop push:quote
+    /\S/ pop push:value push:raw emit
   value
-    { emit push:brace
-    " drop push:quote
     . pop
   brace
     { emit push:brace
     } emit pop
   quote
-    " drop pop
+    " drop pop pop
     \ drop push:escape
   escape
     . emit pop
+  raw
+    /\W/ pop

@@ -1,12 +1,14 @@
 /*jslint node: true */
 var fs = require('fs');
+var path = require('path');
 var yaml = require('js-yaml');
 var lexer = require('./lexer');
 var dom = require('./dom');
 
 var getMachines = function(callback) {
   /** call `callback(err, machines)` when we're ready */
-  fs.readFile('machines.yaml', {encoding: 'utf8'}, function(err, data) {
+  var machines_yaml = path.join(__dirname, 'machines.yaml');
+  fs.readFile(machines_yaml, {encoding: 'utf8'}, function(err, data) {
     if (err) return callback(err);
     var machines = yaml.load(data);
 
@@ -32,7 +34,6 @@ var parse = exports.parse = function(string, callback) {
   getMachines(function(err, machines) {
     if (err) return callback(err);
 
-    console.log('Using bibtex machine:\n\n' + machines.bibtex);
     var bibtex_lexer = new lexer.Lexer.fromString(machines.bibtex.trim(), 'outside');
     bibtex_lexer
       .on('error', function(err) {
@@ -93,14 +94,11 @@ if (require.main === module) {
     var data = chunks.join('');
     parse(data, function(err, entries) {
       if (err) throw err;
-      // console.log('Done', err, entries);
 
       entries.forEach(function(entry) {
         console.log('');
         console.log(entry.toString());
       });
-      // res.json(entries);
-
     });
   });
 }
