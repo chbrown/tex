@@ -84,6 +84,7 @@ TeX.prototype.toNakedString = function() {
     return child.toString();
   }).join('');
 };
+TeX.prototype.toJSON = TeX.prototype.toNakedString;
 TeX.prototype.normalize = function() {
   // return the nearest node with multiple children,
   // or the leaf node if it's only-children all the way down,

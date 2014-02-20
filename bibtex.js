@@ -17,14 +17,14 @@ var getMachines = function(callback) {
 };
 
 var parse = exports.parse = function(string, callback) {
-  /** parse a string of bibtex entries into a list of Entry() objects
+  /** parse a string of bibtex references into a list of Reference() objects
 
   string: String
-  callback: function(err, entries)
+  callback: function(err, references)
 
   */
   // bibtex_lexer.attachConsole();
-  var entries = [];
+  var references = [];
   var current = new dom.Reference();
   var current_tag = {value: ''};
 
@@ -50,7 +50,7 @@ var parse = exports.parse = function(string, callback) {
         var inside_state = states[1];
         if (states.length === 0 && current.type) {
           // flush current
-          entries.push(current);
+          references.push(current);
           current = new dom.Reference();
         }
         else if (inside_state == 'pubtype') {
@@ -77,10 +77,10 @@ var parse = exports.parse = function(string, callback) {
       .on('end', function() {
         // flush current (maybe also current_tag?)
         if (current.type) {
-          entries.push(current);
+          references.push(current);
         }
 
-        callback(null, entries);
+        callback(null, references);
       });
 
     bibtex_lexer.feedString(string);
@@ -92,14 +92,13 @@ if (require.main === module) {
   process.stdin.setEncoding('utf8');
   streaming.readToEnd(process.stdin, function(err, chunks) {
     var data = chunks.join('');
-    parse(data, function(err, entries) {
+    parse(data, function(err, references) {
       if (err) throw err;
 
-      entries.forEach(function(entry) {
+      references.forEach(function(entry) {
         console.log('');
         console.log(entry.toString());
       });
     });
   });
 }
-
