@@ -1,0 +1,95 @@
+---
+- input: |-
+    @inproceedings{li-ritter-hovy:2014,
+      author    = {Li, Jiwei  and  Ritter, Alan  and  Hovy, Eduard},
+      title     = {Weakly Supervised User Profile Extraction from Twitter},
+      booktitle = {Proceedings of the 52nd Annual Meeting of the ACL (Volume 1: Long Papers)},
+      month     = {June},
+      year      = {2014},
+      address   = {Baltimore, Maryland},
+      publisher = {Association for Computational Linguistics},
+      pages     = {165--174},
+      url       = {http://www.aclweb.org/anthology/P14-1016}
+    }
+  canonical: |-
+    @inproceedings{li-ritter-hovy:2014,
+      author = {Li, Jiwei  and  Ritter, Alan  and  Hovy, Eduard},
+      title = {Weakly Supervised User Profile Extraction from Twitter},
+      booktitle = {Proceedings of the 52nd Annual Meeting of the ACL (Volume 1: Long Papers)},
+      month = {June},
+      year = {2014},
+      address = {Baltimore, Maryland},
+      publisher = {Association for Computational Linguistics},
+      pages = {165--174},
+      url = {http://www.aclweb.org/anthology/P14-1016},
+    }
+  reference:
+    _type: "inproceedings"
+    _key: "li-ritter-hovy:2014"
+    author: "Li, Jiwei  and  Ritter, Alan  and  Hovy, Eduard"
+    title: "Weakly Supervised User Profile Extraction from Twitter"
+    booktitle: "Proceedings of the 52nd Annual Meeting of the ACL (Volume 1: Long Papers)"
+    month: "June"
+    year: "2014"
+    address: "Baltimore, Maryland"
+    publisher: "Association for Computational Linguistics"
+    pages: "165--174"
+    url: "http://www.aclweb.org/anthology/P14-1016"
+# from http://en.wikipedia.org/wiki/BibTeX
+- input: |-
+    @Book{hicks2001,
+     author    = "von Hicks, III, Michael",
+     title     = "Design of a Carbon Fiber Composite Grid Structure for the GLAST
+                  Spacecraft Using a Novel Manufacturing Technique",
+     publisher = "Stanford Press",
+     year      =  2001,
+     address   = "Palo Alto",
+     edition   = "1st",
+     isbn      = "0-69-697269-4"
+    }
+  canonical: |-
+    @Book{hicks2001,
+      author = {von Hicks, III, Michael},
+      title = {Design of a Carbon Fiber Composite Grid Structure for the GLAST
+                  Spacecraft Using a Novel Manufacturing Technique},
+      publisher = {Stanford Press},
+      year = {2001},
+      address = {Palo Alto},
+      edition = {1st},
+      isbn = {0-69-697269-4},
+    }
+  reference:
+    _type: Book
+    _key: hicks2001
+    author: "von Hicks, III, Michael"
+    title: "Design of a Carbon Fiber Composite Grid Structure for the GLAST\n              Spacecraft Using a Novel Manufacturing Technique"
+    publisher: Stanford Press
+    year: "2001"
+    address: Palo Alto
+    edition: 1st
+    isbn: 0-69-697269-4
+# from http://en.wikipedia.org/wiki/BibTeX
+- input: |-
+    @Book{Torre2008,
+     author    = "Joe Torre and Tom Verducci",
+     publisher = "Doubleday",
+     title     = "The Yankee Years",
+     year      =  2008,
+     isbn      = "0385527403"
+    }
+  canonical: |-
+    @Book{Torre2008,
+      author = {Joe Torre and Tom Verducci},
+      publisher = {Doubleday},
+      title = {The Yankee Years},
+      year = {2008},
+      isbn = {0385527403},
+    }
+  reference:
+    _type: Book
+    _key: Torre2008
+    author: Joe Torre and Tom Verducci
+    publisher: Doubleday
+    title: The Yankee Years
+    year: "2008"
+    isbn: 0385527403

@@ -35,7 +35,7 @@ bibtex: >
     } emit pop
   quote
     " drop pop pop
-    \ drop push:escape
+    \ emit push:escape
   escape
     . emit pop
   raw

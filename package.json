@@ -16,12 +16,20 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "dependencies": {
     "async": "*",
+    "loge": "*",
     "js-yaml": "*",
     "optimist": "*",
     "streaming": "*",
     "underscore": "*"
   },
-  "devDependencies": {},
-  "bin": {},
-  "scripts": {}
+  "devDependencies": {
+    "mocha": "*",
+    "better-assert": "*"
+  },
+  "bin": {
+    "node-tex": "bin/node-tex"
+  },
+  "scripts": {
+    "test": "mocha"
+  }
 }

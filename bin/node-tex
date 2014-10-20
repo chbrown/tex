@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+/*jslint node: true */
+var logger = require('loge');
+
+var optimist = require('optimist')
+  .usage([
+    'Usage: node-tex <command> [<args>]',
+    '',
+    'commands:',
+    '  parse-bib    Parse a .bib file',
+  ].join('\n'))
+  .describe({
+    help: 'print this help message',
+    json: 'print JSON output',
+    verbose: 'print debug messages',
+    version: 'print version',
+  })
+  .alias({
+    help: 'h',
+    json: 'j',
+    verbose: 'v',
+  })
+  .boolean([
+    'help',
+    'json',
+    'verbose',
+  ]);
+
+var argv = optimist.argv;
+logger.level = argv.verbose ? 'debug' : 'info';
+
+if (argv.help) {
+  optimist.showHelp();
+}
+else if (argv.version) {
+  console.log(require('../package').version);
+}
+else {
+  var command = require('./commands/' + argv._[0]);
+  command(argv);
+}
