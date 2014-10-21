@@ -24,16 +24,16 @@
       url = {http://www.aclweb.org/anthology/P14-1016},
     }
   reference:
-    _type: "inproceedings"
-    _key: "li-ritter-hovy:2014"
+    pubtype: inproceedings
+    citekey: "li-ritter-hovy:2014"
     author: "Li, Jiwei  and  Ritter, Alan  and  Hovy, Eduard"
-    title: "Weakly Supervised User Profile Extraction from Twitter"
+    title: Weakly Supervised User Profile Extraction from Twitter
     booktitle: "Proceedings of the 52nd Annual Meeting of the ACL (Volume 1: Long Papers)"
-    month: "June"
+    month: June
     year: "2014"
     address: "Baltimore, Maryland"
-    publisher: "Association for Computational Linguistics"
-    pages: "165--174"
+    publisher: Association for Computational Linguistics
+    pages: 165--174
     url: "http://www.aclweb.org/anthology/P14-1016"
 # from http://en.wikipedia.org/wiki/BibTeX
 - input: |-
@@ -59,8 +59,8 @@
       isbn = {0-69-697269-4},
     }
   reference:
-    _type: Book
-    _key: hicks2001
+    pubtype: Book
+    citekey: hicks2001
     author: "von Hicks, III, Michael"
     title: "Design of a Carbon Fiber Composite Grid Structure for the GLAST\n              Spacecraft Using a Novel Manufacturing Technique"
     publisher: Stanford Press
@@ -86,8 +86,8 @@
       isbn = {0385527403},
     }
   reference:
-    _type: Book
-    _key: Torre2008
+    pubtype: Book
+    citekey: Torre2008
     author: Joe Torre and Tom Verducci
     publisher: Doubleday
     title: The Yankee Years

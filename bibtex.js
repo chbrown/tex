@@ -24,7 +24,7 @@ var parse = exports.parse = function(string, callback) {
   var errors = 0;
   var tolerance = 10;
 
-  // this lexer doesn't use require('./tex').parse() functionality
+  // this lexer doesn't use `require('./tex').parse()` functionality
   var bibtex_lexer = new lexer.Lexer.fromString(machines.bibtex.trim(), 'outside');
   // attach events before feeding it any input
   bibtex_lexer

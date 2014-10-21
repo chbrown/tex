@@ -57,7 +57,7 @@ Reference.prototype.addTag = function(key, value_string) {
   return tag;
 };
 Reference.prototype.getTag = function(key) {
-  /** Return the accompany stringified value for the tag with a key of "key", or null */
+  /** Return the accompany stringified value for the tag with a key of `key`, or null */
   for (var i = 0; i < this.tags.length; i++) {
     if (this.tags[i].key == key) {
       return this.tags[i].value;
@@ -87,8 +87,8 @@ Reference.prototype.toJSON = function() {
   "simple", meaning a mapping from
   */
   var obj = {
-    _type: this.type,
-    _key: this.key,
+    pubtype: this.type,
+    citekey: this.key,
   };
   for (var i = 0, tag; (tag = this.tags[i]); i++) {
     // we want to preserve the TeX inside the value
