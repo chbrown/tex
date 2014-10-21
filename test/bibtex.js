@@ -9,7 +9,7 @@ var bibtex = require('../bibtex');
 
 logger.level = process.env.DEBUG ? 'VERBOSE' : 'INFO';
 
-var bibtex_yaml = fs.readFileSync(path.join(__dirname, 'bibtex.yaml'), {encoding: 'utf8'});
+var bibtex_yaml = fs.readFileSync(path.join(__dirname, 'bibtex.yaml'));
 var spec = yaml.load(bibtex_yaml);
 
 describe('BibTeX spec', function() {
