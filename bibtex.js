@@ -10,13 +10,11 @@ var Reference = require('./dom/reference').Reference;
 var machines_yaml = fs.readFileSync(path.join(__dirname, 'machines.yaml'), {encoding: 'utf8'});
 var machines = yaml.load(machines_yaml);
 
+/** parse(string: string, callback: (error: Error, references: Reference[]))
+
+Parse a string of bibtex references into a list of Reference objects.
+*/
 var parse = exports.parse = function(string, callback) {
-  /** parse a string of bibtex references into a list of Reference() objects
-
-  string: String
-  callback: function(err, references)
-
-  */
   var references = [];
   var current = new Reference();
   var current_tag = {value: ''};
