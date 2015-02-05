@@ -36,6 +36,11 @@ else if (argv.version) {
   console.log(require('../package').version);
 }
 else {
-  var command = require('./commands/' + argv._[0]);
-  command(argv);
+  argv = optimist.check(function(argv) {
+    if (argv._.length < 1) {
+      throw new Error('You must specify a command');
+    }
+  }).argv;
+
+  require('./commands/' + argv._[0])(argv);
 }
