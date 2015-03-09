@@ -1,4 +1,3 @@
-/*jslint node: true */
 var EventEmitter = require('events').EventEmitter;
 
 var find = function(xs, test) {

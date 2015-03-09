@@ -1,4 +1,3 @@
-/*jslint node: true */
 exports.bibtex = require('./bibtex');
 exports.lexer = require('./lexer');
 exports.tex = require('./tex');

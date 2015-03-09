@@ -1,4 +1,3 @@
-/*jslint node: true */
 var streaming = require('streaming');
 // var _ = require('underscore');
 var bibtex = require('../../bibtex');

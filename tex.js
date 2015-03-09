@@ -1,4 +1,3 @@
-/*jslint node: true */
 var TeX = require('./dom/tex').TeX;
 var Stack = require('./lib/stack').Stack;
 

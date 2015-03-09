@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/*jslint node: true */
 var logger = require('loge');
 
 var optimist = require('optimist')
