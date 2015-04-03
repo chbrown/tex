@@ -1,8 +1,8 @@
 {
   "name": "tex",
   "version": "0.1.0",
-  "description": "",
-  "keywords": [],
+  "description": "Parsers for TeX and BibTeX",
+  "keywords": ["tex", "latex", "bibtex", "parser", "lexer"],
   "homepage": "https://github.com/chbrown/tex",
   "repository": {
     "type": "git",
@@ -16,20 +16,22 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "dependencies": {
     "async": "*",
+    "chalk": "*",
+    "lexing": "~0.3.3",
+    "lodash": "*",
     "loge": "*",
-    "js-yaml": "*",
-    "optimist": "*",
     "streaming": "*",
-    "underscore": "*"
+    "util-enhanced": "*",
+    "yargs": "*"
   },
   "devDependencies": {
     "mocha": "*",
-    "better-assert": "*"
+    "typescript": "1.5.0-alpha"
   },
   "bin": {
-    "node-tex": "bin/node-tex"
+    "tex-cli": "bin/tex-cli"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --recursive test/"
   }
 }
