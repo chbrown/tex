@@ -2,11 +2,7 @@
 import lexing = require('lexing');
 var Rule = lexing.MachineRule;
 
-interface IReference {
-  pubtype: string;
-  citekey: string;
-  fields: {[index: string]: string};
-}
+import types = require('./types');
 
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
@@ -23,7 +19,7 @@ export class STRING extends StringCaptureState<string> {
   rules = [
     Rule(/^\\"/, this.captureMatch),
     Rule(/^"/, this.pop),
-    Rule(/^./, this.captureMatch),
+    Rule(/^(.|\r|\n)/, this.captureMatch),
   ]
   pop(): string {
     return this.value.join('');
@@ -32,7 +28,8 @@ export class STRING extends StringCaptureState<string> {
 
 export class LITERAL extends STRING {
   rules = [
-    Rule(/^\S+/, this.captureMatch),
+    // accept a contiguous string of anything but whitespace and commas
+    Rule(/^[^,\s]+/, this.captureMatch),
     Rule(/^/, this.pop),
   ]
 }
@@ -88,8 +85,8 @@ export class FIELD extends StringCaptureState<[string, string]> {
   }
 }
 
-export class FIELDS extends lexing.MachineState<IReference, IReference> {
-  protected value: IReference = { pubtype: null, citekey: null, fields: {} };
+export class FIELDS extends lexing.MachineState<types.Reference, types.Reference> {
+  protected value: types.Reference = { pubtype: null, citekey: null, fields: {} };
   rules = [
     Rule(/^\}/, this.pop),
     Rule(/^(\s+|,)/, this.ignore),
@@ -109,19 +106,19 @@ export class FIELDS extends lexing.MachineState<IReference, IReference> {
   }
 }
 
-export class REFERENCE extends StringCaptureState<IReference> {
+export class REFERENCE extends StringCaptureState<types.Reference> {
   // this.value is the pubtype string
   rules = [
     Rule(/^\{/, this.popFIELDS),
     Rule(/^(.|\s)/, this.captureMatch),
   ]
-  popFIELDS(): IReference {
+  popFIELDS(): types.Reference {
     var fieldsValue = new FIELDS(this.iterable).read();
     return { pubtype: this.value.join(''), citekey: fieldsValue.citekey, fields: fieldsValue.fields };
   }
 }
 
-export class BIBFILE extends lexing.MachineState<IReference[], IReference[]> {
+class ReferenceCaptureState<T> extends lexing.MachineState<T, string[]> {
   protected value = [];
   rules = [
     // EOF
@@ -135,5 +132,13 @@ export class BIBFILE extends lexing.MachineState<IReference[], IReference[]> {
     var reference = new REFERENCE(this.iterable).read();
     this.value.push(reference);
     return undefined;
+  }
+}
+
+export class BIBFILE extends ReferenceCaptureState<types.Reference[]> { }
+
+export class BIBFILE_FIRST extends ReferenceCaptureState<types.Reference> {
+  pushReference(): types.Reference {
+    return new REFERENCE(this.iterable).read();
   }
 }

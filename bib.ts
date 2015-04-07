@@ -40,7 +40,7 @@ interchangeably, but I think "Reference" is more descriptive.
 
 The list of keys above is also from the BibTeX page on Wikipedia.
 */
-class Reference {
+export class Reference {
   constructor(public pubtype: string,
               public citekey: string,
               public fields: {[index: string]: string} = {}) { }
@@ -62,7 +62,7 @@ class Reference {
 
 export function parseReference(string: string): Reference {
   var string_iterable = new lexing.StringIterator(string);
-  var referenceValue = new states.REFERENCE(string_iterable).read();
+  var referenceValue = new states.BIBFILE_FIRST(string_iterable).read();
   return new Reference(referenceValue.pubtype, referenceValue.citekey, referenceValue.fields);
 }
 
@@ -79,7 +79,7 @@ if (require.main == module) {
     if (err) throw err;
 
     var string = Buffer.concat(chunks).toString('utf8');
-    var references = parseReferences(string);
+    var references = parseReference(string);
     console.log('%j', references);
   });
 }

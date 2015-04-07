@@ -28,7 +28,7 @@ var STRING = (function (_super) {
         this.rules = [
             Rule(/^\\"/, this.captureMatch),
             Rule(/^"/, this.pop),
-            Rule(/^./, this.captureMatch),
+            Rule(/^(.|\r|\n)/, this.captureMatch),
         ];
     }
     STRING.prototype.pop = function () {
@@ -42,7 +42,8 @@ var LITERAL = (function (_super) {
     function LITERAL() {
         _super.apply(this, arguments);
         this.rules = [
-            Rule(/^\S+/, this.captureMatch),
+            // accept a contiguous string of anything but whitespace and commas
+            Rule(/^[^,\s]+/, this.captureMatch),
             Rule(/^/, this.pop),
         ];
     }
@@ -158,9 +159,9 @@ var REFERENCE = (function (_super) {
     return REFERENCE;
 })(StringCaptureState);
 exports.REFERENCE = REFERENCE;
-var BIBFILE = (function (_super) {
-    __extends(BIBFILE, _super);
-    function BIBFILE() {
+var ReferenceCaptureState = (function (_super) {
+    __extends(ReferenceCaptureState, _super);
+    function ReferenceCaptureState() {
         _super.apply(this, arguments);
         this.value = [];
         this.rules = [
@@ -172,11 +173,29 @@ var BIBFILE = (function (_super) {
             Rule(/^(.|\s)/, this.ignore),
         ];
     }
-    BIBFILE.prototype.pushReference = function () {
+    ReferenceCaptureState.prototype.pushReference = function () {
         var reference = new REFERENCE(this.iterable).read();
         this.value.push(reference);
         return undefined;
     };
-    return BIBFILE;
+    return ReferenceCaptureState;
 })(lexing.MachineState);
+var BIBFILE = (function (_super) {
+    __extends(BIBFILE, _super);
+    function BIBFILE() {
+        _super.apply(this, arguments);
+    }
+    return BIBFILE;
+})(ReferenceCaptureState);
 exports.BIBFILE = BIBFILE;
+var BIBFILE_FIRST = (function (_super) {
+    __extends(BIBFILE_FIRST, _super);
+    function BIBFILE_FIRST() {
+        _super.apply(this, arguments);
+    }
+    BIBFILE_FIRST.prototype.pushReference = function () {
+        return new REFERENCE(this.iterable).read();
+    };
+    return BIBFILE_FIRST;
+})(ReferenceCaptureState);
+exports.BIBFILE_FIRST = BIBFILE_FIRST;

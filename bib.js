@@ -63,9 +63,10 @@ var Reference = (function () {
     };
     return Reference;
 })();
+exports.Reference = Reference;
 function parseReference(string) {
     var string_iterable = new lexing.StringIterator(string);
-    var referenceValue = new states.REFERENCE(string_iterable).read();
+    var referenceValue = new states.BIBFILE_FIRST(string_iterable).read();
     return new Reference(referenceValue.pubtype, referenceValue.citekey, referenceValue.fields);
 }
 exports.parseReference = parseReference;
@@ -83,7 +84,7 @@ if (require.main == module) {
         if (err)
             throw err;
         var string = Buffer.concat(chunks).toString('utf8');
-        var references = parseReferences(string);
+        var references = parseReference(string);
         console.log('%j', references);
     });
 }
