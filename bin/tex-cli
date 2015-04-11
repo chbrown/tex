@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+var logger = require('loge');
+var commands = require('./commands');
+
+var bib = require('../bib');
+
+var logger = require('loge');
+var streaming = require('streaming');
+
+var yargs = require('yargs')
+  .usage([
+    'Usage: $0 <command> [<arg1> [<arg2> ...]]',
+    '',
+    'commands:',
+    '  bib-test    Test that the given files can be parsed as BibTeX entries.',
+    '              Prints the filename of unparseable files to STDERR.',
+    '  bib-json',
+    '  bib-format',
+  ].join('\n'))
+  .describe({
+    help: 'print this help message',
+    json: 'print JSON output',
+    verbose: 'print debug messages',
+    version: 'print version',
+  })
+  .alias({
+    help: 'h',
+    verbose: 'v',
+  })
+  .boolean([
+    'help',
+    'verbose',
+  ]);
+
+var argv = yargs.argv;
+logger.level = argv.verbose ? 'debug' : 'info';
+
+if (argv.help) {
+  yargs.showHelp();
+}
+else if (argv.version) {
+  console.log(require('../package').version);
+}
+else {
+  var command = argv._[0];
+  var args = argv._.slice(1);
+  if (command === 'bib-format') {
+    commands.bibFormat(args);
+  }
+  else if (command === 'bib-json') {
+    commands.bibJSON(args);
+  }
+  else if (command === 'bib-test') {
+    commands.bibTest(args);
+  }
+  else {
+    console.error('Unrecognized command: "%s"', command);
+    process.exit(1);
+  }
+}

@@ -1,8 +1,2 @@
-exports.bibtex = require('./bibtex');
-exports.lexer = require('./lexer');
+exports.bib = require('./bib');
 exports.tex = require('./tex');
-
-exports.dom = {
-  reference: require('./dom/reference'),
-  tex: require('./dom/tex'),
-};
