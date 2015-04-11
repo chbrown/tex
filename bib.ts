@@ -47,7 +47,7 @@ export class Reference {
 
   toBibTeX(indent: string = '  ', newline: string = '\n'): string {
     var keys = Object.keys(this.fields);
-    var tag_lines = keys.map(key => `${indent}${key} = ${this.fields[key]},`);
+    var tag_lines = keys.map(key => `${indent}${key} = {${this.fields[key]}},`);
     return `@${this.pubtype}{${this.citekey},${newline}${tag_lines.join(newline)}${newline}}`;
   }
 

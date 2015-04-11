@@ -51,7 +51,7 @@ var Reference = (function () {
         if (indent === void 0) { indent = '  '; }
         if (newline === void 0) { newline = '\n'; }
         var keys = Object.keys(this.fields);
-        var tag_lines = keys.map(function (key) { return ("" + indent + key + " = " + _this.fields[key] + ","); });
+        var tag_lines = keys.map(function (key) { return ("" + indent + key + " = {" + _this.fields[key] + "},"); });
         return "@" + this.pubtype + "{" + this.citekey + "," + newline + tag_lines.join(newline) + newline + "}";
     };
     Reference.prototype.toJSON = function () {
