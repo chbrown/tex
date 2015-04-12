@@ -123,6 +123,7 @@ var FIELDS = (function (_super) {
         this.value = { pubtype: null, citekey: null, fields: {} };
         this.rules = [
             Rule(/^\}/, this.pop),
+            Rule(/^$/, this.pop),
             Rule(/^(\s+|,)/, this.ignore),
             Rule(/^/, this.pushFIELD),
         ];

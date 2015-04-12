@@ -89,6 +89,7 @@ export class FIELDS extends lexing.MachineState<types.Reference, types.Reference
   protected value: types.Reference = { pubtype: null, citekey: null, fields: {} };
   rules = [
     Rule(/^\}/, this.pop),
+    Rule(/^$/, this.pop), // this happens quite a bit, apparently
     Rule(/^(\s+|,)/, this.ignore),
     Rule(/^/, this.pushFIELD),
   ]
