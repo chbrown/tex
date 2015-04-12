@@ -8,15 +8,10 @@ var logger = require('loge');
 var streaming = require('streaming');
 
 var yargs = require('yargs')
-  .usage([
-    'Usage: $0 <command> [<arg1> [<arg2> ...]]',
-    '',
-    'commands:',
-    '  bib-test    Test that the given files can be parsed as BibTeX entries.',
-    '              Prints the filename of unparseable files to STDERR.',
-    '  bib-json',
-    '  bib-format',
-  ].join('\n'))
+  .usage('Usage: $0 <command> [<arg1> [<arg2> ...]]')
+  .command('bib-test', 'Test that the given files can be parsed as BibTeX entries, printing the filename of unparseable files to STDERR')
+  .command('bib-json', 'Parse bib files and format as JSON')
+  .command('bib-format', 'Parse bib files and format as standard BibTeX')
   .describe({
     help: 'print this help message',
     json: 'print JSON output',
