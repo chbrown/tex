@@ -26,7 +26,7 @@ export function bibJSON(filenames: string[]) {
   filenames.forEach(filename => {
     var string = fs.readFileSync(filename, 'utf8');
     bib.parseReferences(string).forEach(reference => {
-      console.log(JSON.stringify(reference, null, '  '));
+      console.log(JSON.stringify(reference));
     });
   });
 }
