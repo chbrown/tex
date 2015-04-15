@@ -2,7 +2,7 @@
 import lexing = require('lexing');
 var Rule = lexing.MachineRule;
 
-import {Reference, TextNode, ParentNode, MacroNode} from './dom';
+import {Reference, Node, TextNode, ParentNode, MacroNode} from './dom';
 
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
@@ -37,26 +37,40 @@ export class LITERAL extends STRING {
 export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\[\\{}%]/, this.captureText), // escaped slash or brace
-    Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro), // macro
-    Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro), // 1-character macro
+    Rule(/^\\[\\{}%]/, this.captureText), // escaped slash or brace or percent
+    Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
     Rule(/^[^\\{}%]+/, this.captureText), // a string of anything except slashes or braces
   ]
+  pop(): ParentNode {
+    // combine macros with their children, if any
+    // is there a better way / place to do this?
+    var children = this.value.children;
+    for (var i = 0, node: Node; (node = children[i]); i++) {
+      if (node instanceof MacroNode) {
+        var nextNode: Node = children[i + 1];
+        if (nextNode instanceof ParentNode) {
+          node.children = nextNode.children;
+          // dispose of the next child
+          children.splice(i + 1, 1);
+        }
+        else if (nextNode instanceof TextNode) {
+          node.children = [new TextNode(nextNode.value[0])];
+          nextNode.value = nextNode.value.slice(1);
+        }
+        // TODO: is \'\i possible?
+      }
+    }
+    return this.value;
+  }
   captureText(matchValue: RegExpMatchArray) {
     var textNode = new TextNode(matchValue[0])
     this.value.children.push(textNode);
     return undefined;
   }
   captureMacro(matchValue: RegExpMatchArray) {
-    var parentNode = new TEX(this.iterable).read();
-    var macroNode = new MacroNode(matchValue[1], parentNode.children)
-    this.value.children.push(macroNode);
-    return undefined;
-  }
-  captureCharMacro(matchValue: RegExpMatchArray) {
-    var macroNode = new MacroNode(matchValue[1], [new TextNode(matchValue[2])])
+    var macroNode = new MacroNode(matchValue[1], [])
     this.value.children.push(macroNode);
     return undefined;
   }

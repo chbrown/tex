@@ -58,26 +58,39 @@ var TEX = (function (_super) {
         this.value = new dom_1.ParentNode();
         this.rules = [
             Rule(/^\\[\\{}%]/, this.captureText),
-            Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro),
-            Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro),
+            Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro),
             Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),
             Rule(/^[^\\{}%]+/, this.captureText),
         ];
     }
+    TEX.prototype.pop = function () {
+        // combine macros with their children, if any
+        // is there a better way / place to do this?
+        var children = this.value.children;
+        for (var i = 0, node; (node = children[i]); i++) {
+            if (node instanceof dom_1.MacroNode) {
+                var nextNode = children[i + 1];
+                if (nextNode instanceof dom_1.ParentNode) {
+                    node.children = nextNode.children;
+                    // dispose of the next child
+                    children.splice(i + 1, 1);
+                }
+                else if (nextNode instanceof dom_1.TextNode) {
+                    node.children = [new dom_1.TextNode(nextNode.value[0])];
+                    nextNode.value = nextNode.value.slice(1);
+                }
+            }
+        }
+        return this.value;
+    };
     TEX.prototype.captureText = function (matchValue) {
         var textNode = new dom_1.TextNode(matchValue[0]);
         this.value.children.push(textNode);
         return undefined;
     };
     TEX.prototype.captureMacro = function (matchValue) {
-        var parentNode = new TEX(this.iterable).read();
-        var macroNode = new dom_1.MacroNode(matchValue[1], parentNode.children);
-        this.value.children.push(macroNode);
-        return undefined;
-    };
-    TEX.prototype.captureCharMacro = function (matchValue) {
-        var macroNode = new dom_1.MacroNode(matchValue[1], [new dom_1.TextNode(matchValue[2])]);
+        var macroNode = new dom_1.MacroNode(matchValue[1], []);
         this.value.children.push(macroNode);
         return undefined;
     };
