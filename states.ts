@@ -2,7 +2,7 @@
 import lexing = require('lexing');
 var Rule = lexing.MachineRule;
 
-import types = require('./types');
+import {Reference, TextNode, ParentNode, MacroNode} from './dom';
 
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
@@ -34,16 +34,35 @@ export class LITERAL extends STRING {
   ]
 }
 
-export class TEX extends STRING {
+export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
+  protected value = new ParentNode();
   rules = [
-    Rule(/^\\\{/, this.captureMatch),
-    Rule(/^\{/, this.captureTEX),
+    Rule(/^\\[\\{}]/, this.captureText), // escaped slash or brace
+    Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro), // macro
+    Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro), // 1-character macro
+    Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
-    Rule(/^(.|\r|\n)/, this.captureMatch),
+    Rule(/^[^\\{}]+/, this.captureText), // a string of anything except slashes or braces
   ]
-  captureTEX() {
-    var texValue = new TEX(this.iterable).read();
-    this.value.push('{', texValue, '}');
+  captureText(matchValue: RegExpMatchArray) {
+    var textNode = new TextNode(matchValue[0])
+    this.value.children.push(textNode);
+    return undefined;
+  }
+  captureMacro(matchValue: RegExpMatchArray) {
+    var parentNode = new TEX(this.iterable).read();
+    var macroNode = new MacroNode(matchValue[1], parentNode.children)
+    this.value.children.push(macroNode);
+    return undefined;
+  }
+  captureCharMacro(matchValue: RegExpMatchArray) {
+    var macroNode = new MacroNode(matchValue[1], [new TextNode(matchValue[2])])
+    this.value.children.push(macroNode);
+    return undefined;
+  }
+  captureParent() {
+    var parentNode = new TEX(this.iterable).read();
+    this.value.children.push(parentNode);
     return undefined;
   }
 }
@@ -60,7 +79,8 @@ export class BIBTEX_STRING extends lexing.MachineState<string, any> {
     return new STRING(this.iterable).read();
   }
   readTEX(): string {
-    return new TEX(this.iterable).read();
+    var node = new TEX(this.iterable).read();
+    return node.toString();
   }
   readLITERAL(): string {
     return new LITERAL(this.iterable).read();
@@ -81,12 +101,14 @@ export class FIELD extends StringCaptureState<[string, string]> {
   }
   popField(): [string, string] {
     var bibtexString = new BIBTEX_STRING(this.iterable).read();
-    return [this.value.join(''), bibtexString];
+    var normalizedString = bibtexString.replace(/\s+/g, ' ');
+    // TODO: other normalizations?
+    return [this.value.join(''), normalizedString];
   }
 }
 
-export class FIELDS extends lexing.MachineState<types.Reference, types.Reference> {
-  protected value: types.Reference = { pubtype: null, citekey: null, fields: {} };
+export class FIELDS extends lexing.MachineState<Reference, Reference> {
+  protected value = new Reference(null, null);
   rules = [
     Rule(/^\}/, this.pop),
     Rule(/^$/, this.pop), // this happens quite a bit, apparently
@@ -107,15 +129,15 @@ export class FIELDS extends lexing.MachineState<types.Reference, types.Reference
   }
 }
 
-export class REFERENCE extends StringCaptureState<types.Reference> {
+export class REFERENCE extends StringCaptureState<Reference> {
   // this.value is the pubtype string
   rules = [
     Rule(/^\{/, this.popFIELDS),
     Rule(/^(.|\s)/, this.captureMatch),
   ]
-  popFIELDS(): types.Reference {
+  popFIELDS(): Reference {
     var fieldsValue = new FIELDS(this.iterable).read();
-    return { pubtype: this.value.join(''), citekey: fieldsValue.citekey, fields: fieldsValue.fields };
+    return new Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
   }
 }
 
@@ -136,10 +158,10 @@ class ReferenceCaptureState<T> extends lexing.MachineState<T, string[]> {
   }
 }
 
-export class BIBFILE extends ReferenceCaptureState<types.Reference[]> { }
+export class BIBFILE extends ReferenceCaptureState<Reference[]> { }
 
-export class BIBFILE_FIRST extends ReferenceCaptureState<types.Reference> {
-  pushReference(): types.Reference {
+export class BIBFILE_FIRST extends ReferenceCaptureState<Reference> {
+  pushReference(): Reference {
     return new REFERENCE(this.iterable).read();
   }
 }

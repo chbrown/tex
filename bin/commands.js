@@ -1,5 +1,6 @@
 var fs = require('fs');
 var bib = require('../bib');
+var tex = require('../tex');
 function bibTest(filenames) {
     filenames.forEach(function (filename) {
         var string = fs.readFileSync(filename, 'utf8');
@@ -30,3 +31,11 @@ function bibJSON(filenames) {
     });
 }
 exports.bibJSON = bibJSON;
+function texFlatten(filenames) {
+    filenames.forEach(function (filename) {
+        var string = fs.readFileSync(filename, 'utf8');
+        var node = tex.parseNode(string);
+        console.log(node.toString());
+    });
+}
+exports.texFlatten = texFlatten;

@@ -12,6 +12,7 @@ var yargs = require('yargs')
   .command('bib-test', 'Test that the given files can be parsed as BibTeX entries, printing the filename of unparseable files to STDERR')
   .command('bib-json', 'Parse bib files and format as JSON')
   .command('bib-format', 'Parse bib files and format as standard BibTeX')
+  .command('tex-flatten')
   .describe({
     help: 'print this help message',
     json: 'print JSON output',
@@ -47,6 +48,9 @@ else {
   }
   else if (command === 'bib-test') {
     commands.bibTest(args);
+  }
+  else if (command === 'tex-flatten') {
+    commands.texFlatten(args);
   }
   else {
     console.error('Unrecognized command: "%s"', command);

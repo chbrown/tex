@@ -1,7 +1,0 @@
----
-- tex: Andr{\'e} is asleep.
-  json: ["Andr", ["\\'e"], "is asleep."]
-- tex: C.~Brown
-  json: ["C.~Brown"]
-- tex: \\url{http://henrian.com}
-  json: ["\\url", ["http://henrian.com"]]

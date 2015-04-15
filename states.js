@@ -7,6 +7,7 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="type_declarations/index.d.ts" />
 var lexing = require('lexing');
 var Rule = lexing.MachineRule;
+var dom_1 = require('./dom');
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
 var StringCaptureState = (function (_super) {
@@ -54,20 +55,39 @@ var TEX = (function (_super) {
     __extends(TEX, _super);
     function TEX() {
         _super.apply(this, arguments);
+        this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\\{/, this.captureMatch),
-            Rule(/^\{/, this.captureTEX),
+            Rule(/^\\[\\{}]/, this.captureText),
+            Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro),
+            Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro),
+            Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),
-            Rule(/^(.|\r|\n)/, this.captureMatch),
+            Rule(/^[^\\{}]+/, this.captureText),
         ];
     }
-    TEX.prototype.captureTEX = function () {
-        var texValue = new TEX(this.iterable).read();
-        this.value.push('{', texValue, '}');
+    TEX.prototype.captureText = function (matchValue) {
+        var textNode = new dom_1.TextNode(matchValue[0]);
+        this.value.children.push(textNode);
+        return undefined;
+    };
+    TEX.prototype.captureMacro = function (matchValue) {
+        var parentNode = new TEX(this.iterable).read();
+        var macroNode = new dom_1.MacroNode(matchValue[1], parentNode.children);
+        this.value.children.push(macroNode);
+        return undefined;
+    };
+    TEX.prototype.captureCharMacro = function (matchValue) {
+        var macroNode = new dom_1.MacroNode(matchValue[1], [new dom_1.TextNode(matchValue[2])]);
+        this.value.children.push(macroNode);
+        return undefined;
+    };
+    TEX.prototype.captureParent = function () {
+        var parentNode = new TEX(this.iterable).read();
+        this.value.children.push(parentNode);
         return undefined;
     };
     return TEX;
-})(STRING);
+})(lexing.MachineState);
 exports.TEX = TEX;
 var BIBTEX_STRING = (function (_super) {
     __extends(BIBTEX_STRING, _super);
@@ -85,7 +105,8 @@ var BIBTEX_STRING = (function (_super) {
         return new STRING(this.iterable).read();
     };
     BIBTEX_STRING.prototype.readTEX = function () {
-        return new TEX(this.iterable).read();
+        var node = new TEX(this.iterable).read();
+        return node.toString();
     };
     BIBTEX_STRING.prototype.readLITERAL = function () {
         return new LITERAL(this.iterable).read();
@@ -111,7 +132,9 @@ var FIELD = (function (_super) {
     };
     FIELD.prototype.popField = function () {
         var bibtexString = new BIBTEX_STRING(this.iterable).read();
-        return [this.value.join(''), bibtexString];
+        var normalizedString = bibtexString.replace(/\s+/g, ' ');
+        // TODO: other normalizations?
+        return [this.value.join(''), normalizedString];
     };
     return FIELD;
 })(StringCaptureState);
@@ -120,7 +143,7 @@ var FIELDS = (function (_super) {
     __extends(FIELDS, _super);
     function FIELDS() {
         _super.apply(this, arguments);
-        this.value = { pubtype: null, citekey: null, fields: {} };
+        this.value = new dom_1.Reference(null, null);
         this.rules = [
             Rule(/^\}/, this.pop),
             Rule(/^$/, this.pop),
@@ -155,7 +178,7 @@ var REFERENCE = (function (_super) {
     }
     REFERENCE.prototype.popFIELDS = function () {
         var fieldsValue = new FIELDS(this.iterable).read();
-        return { pubtype: this.value.join(''), citekey: fieldsValue.citekey, fields: fieldsValue.fields };
+        return new dom_1.Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
     };
     return REFERENCE;
 })(StringCaptureState);
