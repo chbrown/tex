@@ -57,7 +57,7 @@ var TEX = (function (_super) {
         _super.apply(this, arguments);
         this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\[\\{}%]/, this.captureText),
+            Rule(/^\\[\\{}%&#_]/, this.captureText),
             Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro),
             Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),

@@ -37,7 +37,7 @@ export class LITERAL extends STRING {
 export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\[\\{}%]/, this.captureText), // escaped slash or brace or percent
+    Rule(/^\\[\\{}%&#_]/, this.captureText), // escaped slash or brace or percent
     Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
