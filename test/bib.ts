@@ -2,8 +2,16 @@
 import fs = require('fs');
 import path = require('path');
 import assert = require('assert');
+var unorm = require('unorm');
 
 import bib = require('../bib');
+
+function normalizeObject(object: {[index: string]: string}) {
+  for (var key in object) {
+    object[key] = unorm.nfc(object[key]);
+  }
+  return object;
+}
 
 describe('BibTeX parser', () => {
 
@@ -14,8 +22,8 @@ describe('BibTeX parser', () => {
     var json_filepath = bib_filepath.replace(/bib$/, 'json');
     it(`should parse ${bib_filepath} into ${json_filepath}`, () => {
       var input = fs.readFileSync(bib_filepath, {encoding: 'utf8'});
-      var output = bib.parseReference(input).toJSON();
-      var expected_output = JSON.parse(fs.readFileSync(json_filepath, {encoding: 'utf8'}));
+      var output = normalizeObject(bib.parseReference(input).toJSON());
+      var expected_output = normalizeObject(JSON.parse(fs.readFileSync(json_filepath, {encoding: 'utf8'})));
       assert.deepEqual(output, expected_output, `parse result does not match expected output.
         "${input}"
         when parsed => ${JSON.stringify(output)}
