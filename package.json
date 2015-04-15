@@ -1,8 +1,14 @@
 {
   "name": "tex",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Parsers for TeX and BibTeX",
-  "keywords": ["tex", "latex", "bibtex", "parser", "lexer"],
+  "keywords": [
+    "tex",
+    "latex",
+    "bibtex",
+    "parser",
+    "lexer"
+  ],
   "homepage": "https://github.com/chbrown/tex",
   "repository": {
     "type": "git",
