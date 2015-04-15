@@ -70,27 +70,8 @@ var Reference = (function () {
     return Reference;
 })();
 exports.Reference = Reference;
-/**
-Node represents a TeX Node Tree or a single string component of that tree.
-
-If value is not null, children should be empty.
-*/
-var Node = (function () {
-    function Node() {
-    }
-    Node.prototype.toString = function (tex) {
-        return '';
-    };
-    Node.prototype.toJSON = function () {
-        return '';
-    };
-    return Node;
-})();
-exports.Node = Node;
-var TextNode = (function (_super) {
-    __extends(TextNode, _super);
+var TextNode = (function () {
     function TextNode(value) {
-        _super.call(this);
         this.value = value;
     }
     TextNode.prototype.toString = function (tex) {
@@ -100,13 +81,11 @@ var TextNode = (function (_super) {
         return this.value;
     };
     return TextNode;
-})(Node);
+})();
 exports.TextNode = TextNode;
-var ParentNode = (function (_super) {
-    __extends(ParentNode, _super);
+var ParentNode = (function () {
     function ParentNode(children) {
         if (children === void 0) { children = []; }
-        _super.call(this);
         this.children = children;
     }
     /**
@@ -134,7 +113,7 @@ var ParentNode = (function (_super) {
         return this.children;
     };
     return ParentNode;
-})(Node);
+})();
 exports.ParentNode = ParentNode;
 var combining_characters = {
     '`': '\u0300',
@@ -156,6 +135,8 @@ var combining_characters = {
 var special_characters = {
     'l': '\u0142',
     'o': '\u00F8',
+    'i': '\u0131',
+    'j': '\u0237',
 };
 var MacroNode = (function (_super) {
     __extends(MacroNode, _super);

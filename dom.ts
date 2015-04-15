@@ -59,23 +59,8 @@ export class Reference {
   }
 }
 
-/**
-Node represents a TeX Node Tree or a single string component of that tree.
-
-If value is not null, children should be empty.
-*/
-export class Node {
-  constructor() { }
-  toString(tex?: boolean): string {
-    return '';
-  }
-  toJSON() {
-    return '';
-  }
-}
-
-export class TextNode extends Node {
-  constructor(public value: string) { super() }
+export class TextNode {
+  constructor(public value: string) { }
   toString(tex?: boolean): string {
     return this.value;
   }
@@ -84,8 +69,8 @@ export class TextNode extends Node {
   }
 }
 
-export class ParentNode extends Node {
-  constructor(public children: Node[] = []) { super() }
+export class ParentNode {
+  constructor(public children: Node[] = []) { }
 
   /**
   Return a flattened string representation
@@ -133,8 +118,10 @@ var combining_characters = {
 }
 
 var special_characters = {
-  'l': '\u0142',
-  'o': '\u00F8',
+  'l': '\u0142', // l with stroke: ł
+  'o': '\u00F8', // o with stroke: ø
+  'i': '\u0131', // dotless i: ı
+  'j': '\u0237', // dotless j: ȷ
 };
 
 export class MacroNode extends ParentNode {
@@ -166,3 +153,5 @@ export class MacroNode extends ParentNode {
     };
   }
 }
+
+export type Node = TextNode | ParentNode | MacroNode;
