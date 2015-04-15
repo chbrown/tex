@@ -157,9 +157,13 @@ var MacroNode = (function (_super) {
             // the combining character goes after the character it modified
             body += combining_characters[this.name];
         }
-        if (this.name in special_characters) {
+        else if (this.name in special_characters) {
             // body should be empty in these cases, but we'll append it anyway
             body = special_characters[this.name] + body;
+        }
+        else if (this.name == '-') {
+            // kind of a weird place to handle hyphenation hints, I admin
+            body = '' + body;
         }
         else {
         }

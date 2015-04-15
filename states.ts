@@ -37,11 +37,11 @@ export class LITERAL extends STRING {
 export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\[\\{}%&#_]/, this.captureText), // escaped slash or brace or percent
-    Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro), // macro name
+    Rule(/^\\([\\{}%&$#_ ])/, this.captureText), // escaped slash or brace or percent
+    Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
-    Rule(/^[^\\{}%]+/, this.captureText), // a string of anything except slashes or braces
+    Rule(/^([^\\{}%]+)/, this.captureText), // a string of anything except slashes or braces
   ]
   pop(): ParentNode {
     // combine macros with their children, if any
@@ -65,12 +65,12 @@ export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
     return this.value;
   }
   captureText(matchValue: RegExpMatchArray) {
-    var textNode = new TextNode(matchValue[0])
+    var textNode = new TextNode(matchValue[1]);
     this.value.children.push(textNode);
     return undefined;
   }
   captureMacro(matchValue: RegExpMatchArray) {
-    var macroNode = new MacroNode(matchValue[1], [])
+    var macroNode = new MacroNode(matchValue[1], []);
     this.value.children.push(macroNode);
     return undefined;
   }

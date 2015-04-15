@@ -57,11 +57,11 @@ var TEX = (function (_super) {
         _super.apply(this, arguments);
         this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\[\\{}%&#_]/, this.captureText),
-            Rule(/^\\([`'^"~=.]|[A-Za-z]+)/, this.captureMacro),
+            Rule(/^\\([\\{}%&$#_ ])/, this.captureText),
+            Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro),
             Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),
-            Rule(/^[^\\{}%]+/, this.captureText),
+            Rule(/^([^\\{}%]+)/, this.captureText),
         ];
     }
     TEX.prototype.pop = function () {
@@ -85,7 +85,7 @@ var TEX = (function (_super) {
         return this.value;
     };
     TEX.prototype.captureText = function (matchValue) {
-        var textNode = new dom_1.TextNode(matchValue[0]);
+        var textNode = new dom_1.TextNode(matchValue[1]);
         this.value.children.push(textNode);
         return undefined;
     };
