@@ -58,7 +58,10 @@ var Reference = (function () {
         return "@" + this.pubtype + "{" + this.citekey + "," + newline + tag_lines.join(newline) + newline + "}";
     };
     Reference.prototype.toJSON = function () {
-        var obj = { pubtype: this.pubtype, citekey: this.citekey };
+        var obj = {
+            pubtype: this.pubtype,
+            citekey: this.citekey,
+        };
         for (var key in this.fields) {
             obj[key] = this.fields[key];
         }

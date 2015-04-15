@@ -47,8 +47,11 @@ export class Reference {
     return `@${this.pubtype}{${this.citekey},${newline}${tag_lines.join(newline)}${newline}}`;
   }
 
-  toJSON() {
-    var obj = { pubtype: this.pubtype, citekey: this.citekey };
+  toJSON(): {[index: string]: string} {
+    var obj: {[index: string]: string} = {
+      pubtype: this.pubtype,
+      citekey: this.citekey,
+    };
     for (var key in this.fields) {
       obj[key] = this.fields[key];
     }
