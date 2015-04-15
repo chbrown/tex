@@ -37,12 +37,12 @@ export class LITERAL extends STRING {
 export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\[\\{}]/, this.captureText), // escaped slash or brace
+    Rule(/^\\[\\{}%]/, this.captureText), // escaped slash or brace
     Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro), // macro
     Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro), // 1-character macro
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
-    Rule(/^[^\\{}]+/, this.captureText), // a string of anything except slashes or braces
+    Rule(/^[^\\{}%]+/, this.captureText), // a string of anything except slashes or braces
   ]
   captureText(matchValue: RegExpMatchArray) {
     var textNode = new TextNode(matchValue[0])

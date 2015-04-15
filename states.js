@@ -57,12 +57,12 @@ var TEX = (function (_super) {
         _super.apply(this, arguments);
         this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\[\\{}]/, this.captureText),
+            Rule(/^\\[\\{}%]/, this.captureText),
             Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)\{/, this.captureMacro),
             Rule(/^\\([`'^"H~ckl=b.druvto]|[A-Za-z]+)(.)/, this.captureCharMacro),
             Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),
-            Rule(/^[^\\{}]+/, this.captureText),
+            Rule(/^[^\\{}%]+/, this.captureText),
         ];
     }
     TEX.prototype.captureText = function (matchValue) {
