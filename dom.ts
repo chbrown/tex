@@ -57,6 +57,18 @@ export class Reference {
     }
     return obj;
   }
+
+  static fromJSON(object: {[index: string]: string}): Reference {
+    var pubtype = object['pubtype'];
+    var citekey = object['citekey'];
+    var fields: {[index: string]: string} = {};
+    for (var key in object) {
+      if (object.hasOwnProperty(key) && key != 'pubtype' && key != 'citekey') {
+        fields[key] = object[key];
+      }
+    }
+    return new Reference(pubtype, citekey, fields);
+  }
 }
 
 export class TextNode {

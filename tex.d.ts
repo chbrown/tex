@@ -8,7 +8,8 @@ declare module "tex" {
       citekey: string;
       fields: {[index: string]: string};
       toBibTeX(indent?: string, newline?: string): string;
-      toJSON(): {[index: string]: string}
+      toJSON(): {[index: string]: string};
+      static fromJSON(object: {[index: string]: string}): Reference;
     }
   }
   export module tex {

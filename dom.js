@@ -67,6 +67,17 @@ var Reference = (function () {
         }
         return obj;
     };
+    Reference.fromJSON = function (object) {
+        var pubtype = object['pubtype'];
+        var citekey = object['citekey'];
+        var fields = {};
+        for (var key in object) {
+            if (object.hasOwnProperty(key) && key != 'pubtype' && key != 'citekey') {
+                fields[key] = object[key];
+            }
+        }
+        return new Reference(pubtype, citekey, fields);
+    };
     return Reference;
 })();
 exports.Reference = Reference;
