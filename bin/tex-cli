@@ -2,11 +2,6 @@
 var logger = require('loge');
 var commands = require('./commands');
 
-var bib = require('../bib');
-
-var logger = require('loge');
-var streaming = require('streaming');
-
 var yargs = require('yargs')
   .usage('Usage: $0 <command> [<arg1> [<arg2> ...]]')
   .command('bib-test', 'Test that the given files can be parsed as BibTeX entries, printing the filename of unparseable files to STDERR')
