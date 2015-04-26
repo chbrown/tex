@@ -2,14 +2,16 @@
 import lexing = require('lexing');
 import states = require('./states');
 
-import {Reference} from './dom';
+import * as dom from './dom';
 
-export function parseReference(string: string): Reference {
+export function parseReference(string: string): dom.Reference {
   var string_iterable = new lexing.StringIterator(string);
   return new states.BIBFILE_FIRST(string_iterable).read();
 }
 
-export function parseReferences(string: string): Reference[] {
+export function parseReferences(string: string): dom.Reference[] {
   var string_iterable = new lexing.StringIterator(string);
   return new states.BIBFILE(string_iterable).read();
 }
+
+export var Reference = dom.Reference;
