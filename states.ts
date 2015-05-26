@@ -75,7 +75,7 @@ export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
     return undefined;
   }
   captureParent() {
-    var parentNode = new TEX(this.iterable).read();
+    var parentNode = this.attachState(TEX).read();
     this.value.children.push(parentNode);
     return undefined;
   }
@@ -90,14 +90,13 @@ export class BIBTEX_STRING extends lexing.MachineState<string, any> {
     Rule(/^/, this.readLITERAL),
   ]
   readSTRING(): string {
-    return new STRING(this.iterable).read();
+    return this.attachState(STRING).read();
   }
   readTEX(): string {
-    var node = new TEX(this.iterable).read();
-    return node.toString();
+    return this.attachState(TEX).read().toString();
   }
   readLITERAL(): string {
-    return new LITERAL(this.iterable).read();
+    return this.attachState(LITERAL).read();
   }
 }
 
@@ -114,7 +113,7 @@ export class FIELD extends StringCaptureState<[string, string]> {
     return [this.value.join(''), null];
   }
   popField(): [string, string] {
-    var bibtexString = new BIBTEX_STRING(this.iterable).read();
+    var bibtexString = this.attachState(BIBTEX_STRING).read();
     var normalizedString = bibtexString.replace(/\s+/g, ' ');
     // TODO: other normalizations?
     return [this.value.join(''), normalizedString];
@@ -130,7 +129,7 @@ export class FIELDS extends lexing.MachineState<Reference, Reference> {
     Rule(/^/, this.pushFIELD),
   ]
   pushFIELD() {
-    var fieldValue = new FIELD(this.iterable).read();
+    var fieldValue = this.attachState(FIELD).read();
     if (fieldValue[1] === null) {
       // set citekey
       this.value.citekey = fieldValue[0];
@@ -150,7 +149,7 @@ export class REFERENCE extends StringCaptureState<Reference> {
     Rule(/^(.|\s)/, this.captureMatch),
   ]
   popFIELDS(): Reference {
-    var fieldsValue = new FIELDS(this.iterable).read();
+    var fieldsValue = this.attachState(FIELDS).read();
     return new Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
   }
 }
@@ -166,7 +165,7 @@ class ReferenceCaptureState<T> extends lexing.MachineState<T, string[]> {
     Rule(/^(.|\s)/, this.ignore),
   ]
   pushReference() {
-    var reference = new REFERENCE(this.iterable).read();
+    var reference = this.attachState(REFERENCE).read();
     this.value.push(reference);
     return undefined;
   }
@@ -176,6 +175,6 @@ export class BIBFILE extends ReferenceCaptureState<Reference[]> { }
 
 export class BIBFILE_FIRST extends ReferenceCaptureState<Reference> {
   pushReference(): Reference {
-    return new REFERENCE(this.iterable).read();
+    return this.attachState(REFERENCE).read();
   }
 }

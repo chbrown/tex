@@ -95,7 +95,7 @@ var TEX = (function (_super) {
         return undefined;
     };
     TEX.prototype.captureParent = function () {
-        var parentNode = new TEX(this.iterable).read();
+        var parentNode = this.attachState(TEX).read();
         this.value.children.push(parentNode);
         return undefined;
     };
@@ -115,14 +115,13 @@ var BIBTEX_STRING = (function (_super) {
         ];
     }
     BIBTEX_STRING.prototype.readSTRING = function () {
-        return new STRING(this.iterable).read();
+        return this.attachState(STRING).read();
     };
     BIBTEX_STRING.prototype.readTEX = function () {
-        var node = new TEX(this.iterable).read();
-        return node.toString();
+        return this.attachState(TEX).read().toString();
     };
     BIBTEX_STRING.prototype.readLITERAL = function () {
-        return new LITERAL(this.iterable).read();
+        return this.attachState(LITERAL).read();
     };
     return BIBTEX_STRING;
 })(lexing.MachineState);
@@ -144,7 +143,7 @@ var FIELD = (function (_super) {
         return [this.value.join(''), null];
     };
     FIELD.prototype.popField = function () {
-        var bibtexString = new BIBTEX_STRING(this.iterable).read();
+        var bibtexString = this.attachState(BIBTEX_STRING).read();
         var normalizedString = bibtexString.replace(/\s+/g, ' ');
         // TODO: other normalizations?
         return [this.value.join(''), normalizedString];
@@ -165,7 +164,7 @@ var FIELDS = (function (_super) {
         ];
     }
     FIELDS.prototype.pushFIELD = function () {
-        var fieldValue = new FIELD(this.iterable).read();
+        var fieldValue = this.attachState(FIELD).read();
         if (fieldValue[1] === null) {
             // set citekey
             this.value.citekey = fieldValue[0];
@@ -190,7 +189,7 @@ var REFERENCE = (function (_super) {
         ];
     }
     REFERENCE.prototype.popFIELDS = function () {
-        var fieldsValue = new FIELDS(this.iterable).read();
+        var fieldsValue = this.attachState(FIELDS).read();
         return new dom_1.Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
     };
     return REFERENCE;
@@ -211,7 +210,7 @@ var ReferenceCaptureState = (function (_super) {
         ];
     }
     ReferenceCaptureState.prototype.pushReference = function () {
-        var reference = new REFERENCE(this.iterable).read();
+        var reference = this.attachState(REFERENCE).read();
         this.value.push(reference);
         return undefined;
     };
@@ -231,7 +230,7 @@ var BIBFILE_FIRST = (function (_super) {
         _super.apply(this, arguments);
     }
     BIBFILE_FIRST.prototype.pushReference = function () {
-        return new REFERENCE(this.iterable).read();
+        return this.attachState(REFERENCE).read();
     };
     return BIBFILE_FIRST;
 })(ReferenceCaptureState);
