@@ -39,6 +39,6 @@
     "tex-cli": "bin/tex-cli"
   },
   "scripts": {
-    "test": "mocha --recursive test/"
+    "test": "make test"
   }
 }
