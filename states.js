@@ -7,6 +7,7 @@ var __extends = this.__extends || function (d, b) {
 /// <reference path="type_declarations/index.d.ts" />
 var lexing = require('lexing');
 var Rule = lexing.MachineRule;
+var models_1 = require('./models');
 var dom_1 = require('./dom');
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
@@ -22,6 +23,7 @@ var StringCaptureState = (function (_super) {
     };
     return StringCaptureState;
 })(lexing.MachineState);
+exports.StringCaptureState = StringCaptureState;
 var STRING = (function (_super) {
     __extends(STRING, _super);
     function STRING() {
@@ -155,7 +157,7 @@ var FIELDS = (function (_super) {
     __extends(FIELDS, _super);
     function FIELDS() {
         _super.apply(this, arguments);
-        this.value = new dom_1.Reference(null, null);
+        this.value = new models_1.BibTeXEntry(null, null);
         this.rules = [
             Rule(/^\}/, this.pop),
             Rule(/^$/, this.pop),
@@ -178,9 +180,9 @@ var FIELDS = (function (_super) {
     return FIELDS;
 })(lexing.MachineState);
 exports.FIELDS = FIELDS;
-var REFERENCE = (function (_super) {
-    __extends(REFERENCE, _super);
-    function REFERENCE() {
+var BIBTEX_ENTRY = (function (_super) {
+    __extends(BIBTEX_ENTRY, _super);
+    function BIBTEX_ENTRY() {
         _super.apply(this, arguments);
         // this.value is the pubtype string
         this.rules = [
@@ -188,41 +190,42 @@ var REFERENCE = (function (_super) {
             Rule(/^(.|\s)/, this.captureMatch),
         ];
     }
-    REFERENCE.prototype.popFIELDS = function () {
+    BIBTEX_ENTRY.prototype.popFIELDS = function () {
         var fieldsValue = this.attachState(FIELDS).read();
-        return new dom_1.Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
+        return new models_1.BibTeXEntry(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
     };
-    return REFERENCE;
+    return BIBTEX_ENTRY;
 })(StringCaptureState);
-exports.REFERENCE = REFERENCE;
-var ReferenceCaptureState = (function (_super) {
-    __extends(ReferenceCaptureState, _super);
-    function ReferenceCaptureState() {
+exports.BIBTEX_ENTRY = BIBTEX_ENTRY;
+var BibTeXEntryCaptureState = (function (_super) {
+    __extends(BibTeXEntryCaptureState, _super);
+    function BibTeXEntryCaptureState() {
         _super.apply(this, arguments);
         this.value = [];
         this.rules = [
             // EOF
             Rule(/^$/, this.pop),
             // reference
-            Rule(/^@/, this.pushReference),
+            Rule(/^@/, this.pushBibTeXEntry),
             // whitespace
             Rule(/^(.|\s)/, this.ignore),
         ];
     }
-    ReferenceCaptureState.prototype.pushReference = function () {
-        var reference = this.attachState(REFERENCE).read();
+    BibTeXEntryCaptureState.prototype.pushBibTeXEntry = function () {
+        var reference = this.attachState(BIBTEX_ENTRY).read();
         this.value.push(reference);
         return undefined;
     };
-    return ReferenceCaptureState;
+    return BibTeXEntryCaptureState;
 })(lexing.MachineState);
+exports.BibTeXEntryCaptureState = BibTeXEntryCaptureState;
 var BIBFILE = (function (_super) {
     __extends(BIBFILE, _super);
     function BIBFILE() {
         _super.apply(this, arguments);
     }
     return BIBFILE;
-})(ReferenceCaptureState);
+})(BibTeXEntryCaptureState);
 exports.BIBFILE = BIBFILE;
 var BIBFILE_FIRST = (function (_super) {
     __extends(BIBFILE_FIRST, _super);
@@ -230,8 +233,8 @@ var BIBFILE_FIRST = (function (_super) {
         _super.apply(this, arguments);
     }
     BIBFILE_FIRST.prototype.pushReference = function () {
-        return this.attachState(REFERENCE).read();
+        return this.attachState(BIBTEX_ENTRY).read();
     };
     return BIBFILE_FIRST;
-})(ReferenceCaptureState);
+})(BibTeXEntryCaptureState);
 exports.BIBFILE_FIRST = BIBFILE_FIRST;

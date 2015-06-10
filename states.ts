@@ -2,12 +2,13 @@
 import lexing = require('lexing');
 var Rule = lexing.MachineRule;
 
-import {Reference, Node, TextNode, ParentNode, MacroNode} from './dom';
+import {BibTeXEntry} from './models';
+import {Node, TextNode, ParentNode, MacroNode} from './dom';
 
 // all the classes below extend the lexing.MachineState base class,
 // and are roughly in order of inheritance / usage
 
-class StringCaptureState<T> extends lexing.MachineState<T, string[]> {
+export class StringCaptureState<T> extends lexing.MachineState<T, string[]> {
   protected value = [];
   captureMatch(matchValue: RegExpMatchArray) {
     this.value.push(matchValue[0]);
@@ -120,8 +121,8 @@ export class FIELD extends StringCaptureState<[string, string]> {
   }
 }
 
-export class FIELDS extends lexing.MachineState<Reference, Reference> {
-  protected value = new Reference(null, null);
+export class FIELDS extends lexing.MachineState<BibTeXEntry, BibTeXEntry> {
+  protected value = new BibTeXEntry(null, null);
   rules = [
     Rule(/^\}/, this.pop),
     Rule(/^$/, this.pop), // this happens quite a bit, apparently
@@ -142,39 +143,39 @@ export class FIELDS extends lexing.MachineState<Reference, Reference> {
   }
 }
 
-export class REFERENCE extends StringCaptureState<Reference> {
+export class BIBTEX_ENTRY extends StringCaptureState<BibTeXEntry> {
   // this.value is the pubtype string
   rules = [
     Rule(/^\{/, this.popFIELDS),
     Rule(/^(.|\s)/, this.captureMatch),
   ]
-  popFIELDS(): Reference {
+  popFIELDS(): BibTeXEntry {
     var fieldsValue = this.attachState(FIELDS).read();
-    return new Reference(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
+    return new BibTeXEntry(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
   }
 }
 
-class ReferenceCaptureState<T> extends lexing.MachineState<T, string[]> {
+export class BibTeXEntryCaptureState<T> extends lexing.MachineState<T, string[]> {
   protected value = [];
   rules = [
     // EOF
     Rule(/^$/, this.pop),
     // reference
-    Rule(/^@/, this.pushReference),
+    Rule(/^@/, this.pushBibTeXEntry),
     // whitespace
     Rule(/^(.|\s)/, this.ignore),
   ]
-  pushReference() {
-    var reference = this.attachState(REFERENCE).read();
+  pushBibTeXEntry() {
+    var reference = this.attachState(BIBTEX_ENTRY).read();
     this.value.push(reference);
     return undefined;
   }
 }
 
-export class BIBFILE extends ReferenceCaptureState<Reference[]> { }
+export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> { }
 
-export class BIBFILE_FIRST extends ReferenceCaptureState<Reference> {
-  pushReference(): Reference {
-    return this.attachState(REFERENCE).read();
+export class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
+  pushReference(): BibTeXEntry {
+    return this.attachState(BIBTEX_ENTRY).read();
   }
 }
