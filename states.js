@@ -232,7 +232,7 @@ var BIBFILE_FIRST = (function (_super) {
     function BIBFILE_FIRST() {
         _super.apply(this, arguments);
     }
-    BIBFILE_FIRST.prototype.pushReference = function () {
+    BIBFILE_FIRST.prototype.pushBibTeXEntry = function () {
         return this.attachState(BIBTEX_ENTRY).read();
     };
     return BIBFILE_FIRST;

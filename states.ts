@@ -175,7 +175,7 @@ export class BibTeXEntryCaptureState<T> extends lexing.MachineState<T, string[]>
 export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> { }
 
 export class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
-  pushReference(): BibTeXEntry {
+  pushBibTeXEntry(): BibTeXEntry {
     return this.attachState(BIBTEX_ENTRY).read();
   }
 }
