@@ -1,3 +1,29 @@
+const combining_characters = {
+  '`': '\u0300',
+  "'": '\u0301',
+  '^': '\u0302',
+  '"': '\u0308',
+  'H': '\u030B',
+  '~': '\u0303',
+  'c': '\u0327',
+  'k': '\u0328',
+  '=': '\u0304',
+  'b': '\u0331',
+  '.': '\u0307',
+  'd': '\u0323',
+  'r': '\u030a',
+  'u': '\u0306',
+  'v': '\u030c',
+  // 't': '\u03',
+};
+
+const special_characters = {
+  'l': '\u0142', // l with stroke: ł
+  'o': '\u00F8', // o with stroke: ø
+  'i': '\u0131', // dotless i: ı
+  'j': '\u0237', // dotless j: ȷ
+};
+
 export class TextNode {
   constructor(public value: string) { }
   toString(tex?: boolean): string {
@@ -36,32 +62,6 @@ export class ParentNode {
     return this.children;
   }
 }
-
-var combining_characters = {
-  '`': '\u0300',
-  "'": '\u0301',
-  '^': '\u0302',
-  '"': '\u0308',
-  'H': '\u030B',
-  '~': '\u0303',
-  'c': '\u0327',
-  'k': '\u0328',
-  '=': '\u0304',
-  'b': '\u0331',
-  '.': '\u0307',
-  'd': '\u0323',
-  'r': '\u030a',
-  'u': '\u0306',
-  'v': '\u030c',
-  // 't': '\u03',
-}
-
-var special_characters = {
-  'l': '\u0142', // l with stroke: ł
-  'o': '\u00F8', // o with stroke: ø
-  'i': '\u0131', // dotless i: ı
-  'j': '\u0237', // dotless j: ȷ
-};
 
 export class MacroNode extends ParentNode {
   constructor(public name: string, children: Node[] = []) { super(children) }

@@ -1,8 +1,31 @@
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
+};
+var combining_characters = {
+    '`': '\u0300',
+    "'": '\u0301',
+    '^': '\u0302',
+    '"': '\u0308',
+    'H': '\u030B',
+    '~': '\u0303',
+    'c': '\u0327',
+    'k': '\u0328',
+    '=': '\u0304',
+    'b': '\u0331',
+    '.': '\u0307',
+    'd': '\u0323',
+    'r': '\u030a',
+    'u': '\u0306',
+    'v': '\u030c',
+};
+var special_characters = {
+    'l': '\u0142',
+    'o': '\u00F8',
+    'i': '\u0131',
+    'j': '\u0237',
 };
 var TextNode = (function () {
     function TextNode(value) {
@@ -49,29 +72,6 @@ var ParentNode = (function () {
     return ParentNode;
 })();
 exports.ParentNode = ParentNode;
-var combining_characters = {
-    '`': '\u0300',
-    "'": '\u0301',
-    '^': '\u0302',
-    '"': '\u0308',
-    'H': '\u030B',
-    '~': '\u0303',
-    'c': '\u0327',
-    'k': '\u0328',
-    '=': '\u0304',
-    'b': '\u0331',
-    '.': '\u0307',
-    'd': '\u0323',
-    'r': '\u030a',
-    'u': '\u0306',
-    'v': '\u030c',
-};
-var special_characters = {
-    'l': '\u0142',
-    'o': '\u00F8',
-    'i': '\u0131',
-    'j': '\u0237',
-};
 var MacroNode = (function (_super) {
     __extends(MacroNode, _super);
     function MacroNode(name, children) {
