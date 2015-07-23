@@ -53,13 +53,18 @@ var LITERAL = (function (_super) {
     return LITERAL;
 })(STRING);
 exports.LITERAL = LITERAL;
+/**
+TeX's special characters:
+
+    # $ % & \ ^ _ { }
+*/
 var TEX = (function (_super) {
     __extends(TEX, _super);
     function TEX() {
         _super.apply(this, arguments);
         this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\([\\{}%&$#_ ])/, this.captureText),
+            Rule(/^\\([#$%&\\^_{} ])/, this.captureText),
             Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro),
             Rule(/^\{/, this.captureParent),
             Rule(/^\}/, this.pop),
@@ -205,16 +210,21 @@ var BibTeXEntryCaptureState = (function (_super) {
         this.rules = [
             // EOF
             Rule(/^$/, this.pop),
+            // special entry types
+            Rule(/^@preamble\{/i, this.pushPreamble),
             // reference
             Rule(/^@/, this.pushBibTeXEntry),
             // whitespace
             Rule(/^(.|\s)/, this.ignore),
         ];
     }
-    BibTeXEntryCaptureState.prototype.pushBibTeXEntry = function () {
-        var reference = this.attachState(BIBTEX_ENTRY).read();
-        this.value.push(reference);
+    BibTeXEntryCaptureState.prototype.pushPreamble = function () {
+        var tex = this.attachState(TEX).read();
+        // simply discard it
         return undefined;
+    };
+    BibTeXEntryCaptureState.prototype.pushBibTeXEntry = function () {
+        throw new Error('Cannot call abstract method');
     };
     return BibTeXEntryCaptureState;
 })(lexing.MachineState);
@@ -224,6 +234,11 @@ var BIBFILE = (function (_super) {
     function BIBFILE() {
         _super.apply(this, arguments);
     }
+    BIBFILE.prototype.pushBibTeXEntry = function () {
+        var reference = this.attachState(BIBTEX_ENTRY).read();
+        this.value.push(reference);
+        return undefined;
+    };
     return BIBFILE;
 })(BibTeXEntryCaptureState);
 exports.BIBFILE = BIBFILE;

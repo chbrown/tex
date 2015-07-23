@@ -35,14 +35,19 @@ export class LITERAL extends STRING {
   ]
 }
 
+/**
+TeX's special characters:
+
+    # $ % & \ ^ _ { }
+*/
 export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\([\\{}%&$#_ ])/, this.captureText), // escaped slash or brace or percent
+    Rule(/^\\([#$%&\\^_{} ])/, this.captureText), // escaped special character or space
     Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
-    Rule(/^([^\\{}%]+)/, this.captureText), // a string of anything except slashes or braces
+    Rule(/^([^\\{}%]+)/, this.captureText), // a string of anything except slashes or braces or percents
   ]
   pop(): ParentNode {
     // combine macros with their children, if any
@@ -160,19 +165,30 @@ export class BibTeXEntryCaptureState<T> extends lexing.MachineState<T, string[]>
   rules = [
     // EOF
     Rule(/^$/, this.pop),
+    // special entry types
+    Rule(/^@preamble\{/i, this.pushPreamble),
     // reference
     Rule(/^@/, this.pushBibTeXEntry),
     // whitespace
     Rule(/^(.|\s)/, this.ignore),
   ]
+  pushPreamble() {
+    var tex = this.attachState(TEX).read();
+    // simply discard it
+    return undefined;
+  }
+  pushBibTeXEntry() {
+    throw new Error('Cannot call abstract method');
+  }
+}
+
+export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> {
   pushBibTeXEntry() {
     var reference = this.attachState(BIBTEX_ENTRY).read();
     this.value.push(reference);
     return undefined;
   }
 }
-
-export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> { }
 
 export class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
   pushBibTeXEntry(): BibTeXEntry {
