@@ -1,8 +1,8 @@
 BIN := node_modules/.bin
-TYPESCRIPT := $(wildcard *.ts test/*.ts)
 DTS := node/node async/async chalk/chalk lodash/lodash mocha/mocha yargs/yargs
+TYPESCRIPT := $(wildcard *.ts test/*.ts)
 
-all: $(TYPESCRIPT:%.ts=%.js) type_declarations/DefinitelyTyped.d.ts
+all: $(TYPESCRIPT:%.ts=%.js)
 type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
 
 $(BIN)/mocha $(BIN)/tsc:
@@ -14,9 +14,6 @@ $(BIN)/mocha $(BIN)/tsc:
 type_declarations/DefinitelyTyped/%:
 	mkdir -p $(@D)
 	curl -s https://raw.githubusercontent.com/chbrown/DefinitelyTyped/master/$* > $@
-
-type_declarations/DefinitelyTyped.d.ts:
-	for path in $(DTS:%=DefinitelyTyped/%.d.ts); do echo "/// <reference path=\"$$path\" />"; done > $@
 
 .PHONY: test
 test: $(BIN)/mocha
