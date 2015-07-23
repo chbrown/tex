@@ -101,7 +101,7 @@ function cli() {
         yargs_parser.showHelp();
     }
     else if (argv.version) {
-        console.log(require('../package').version);
+        console.log(require('./package.json').version);
     }
     else {
         var _a = yargs_parser.demand(1).argv._, command = _a[0], filenames = _a.slice(1);

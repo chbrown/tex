@@ -110,7 +110,7 @@ export function cli() {
     yargs_parser.showHelp();
   }
   else if (argv.version) {
-    console.log(require('../package').version);
+    console.log(require('./package.json').version);
   }
   else {
     var [command, ...filenames] = yargs_parser.demand(1).argv._;
