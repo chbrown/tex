@@ -1,8 +1,7 @@
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 /// <reference path="type_declarations/index.d.ts" />
 var lexing = require('lexing');
@@ -225,6 +224,7 @@ var BibTeXEntryCaptureState = (function (_super) {
     };
     BibTeXEntryCaptureState.prototype.pushBibTeXEntry = function () {
         throw new Error('Cannot call abstract method');
+        return undefined;
     };
     return BibTeXEntryCaptureState;
 })(lexing.MachineState);

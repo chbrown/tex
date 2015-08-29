@@ -12,8 +12,9 @@
   "homepage": "https://github.com/chbrown/tex",
   "repository": {
     "type": "git",
-    "url": "git://github.com/chbrown/tex.git"
+    "url": "https://github.com/chbrown/tex.git"
   },
+
   "bugs": {
     "email": "Christopher Brown <io@henrian.com>",
     "url": "https://github.com/chbrown/tex/issues"
@@ -21,13 +22,8 @@
   "license": "MIT",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "dependencies": {
-    "async": "*",
-    "chalk": "*",
-    "lexing": "*",
-    "lodash": "*",
-    "loge": "*",
-    "streaming": "*",
-    "util-enhanced": "*",
+    "lexing": "^0.4.1",
+    "loge": "^1.0.1",
     "yargs": "*"
   },
   "devDependencies": {

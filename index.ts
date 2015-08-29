@@ -1,12 +1,12 @@
 /// <reference path="type_declarations/index.d.ts" />
-import lexing = require('lexing');
-import logger = require('loge');
+import * as lexing from 'lexing';
+import {logger, Level} from 'loge';
 import yargs = require('yargs');
-import fs = require('fs');
+import {readFileSync} from 'fs';
 
 import states = require('./states');
-import dom = require('./dom');
-import models = require('./models');
+import {ParentNode} from './dom';
+import * as models from './models';
 
 export var BibTeXEntry = models.BibTeXEntry;
 
@@ -20,7 +20,7 @@ export function parseBibTeXEntries(string: string): models.BibTeXEntry[] {
   return new states.BIBFILE(string_iterable, 1024).read();
 }
 
-export function parseNode(tex: string): dom.ParentNode {
+export function parseNode(tex: string): ParentNode {
   var string_iterable = new lexing.StringIterator(tex);
   // skip over the initial {
   string_iterable.skip(1);
@@ -44,21 +44,21 @@ type CLICommand = (filename: string) => void;
 const cliCommands: {[index: string]: CLICommand} = {
   'bib-format': (filename: string) => {
     logger.debug('bib-format "%s"', filename);
-    var data = fs.readFileSync(filename, 'utf8');
+    var data = readFileSync(filename, 'utf8');
     parseBibTeXEntries(data).forEach(reference => {
       console.log(reference.toBibTeX());
     });
   },
   'bib-json': (filename: string) => {
     logger.debug('bib-json "%s"', filename);
-    var data = fs.readFileSync(filename, 'utf8');
+    var data = readFileSync(filename, 'utf8');
     parseBibTeXEntries(data).forEach(reference => {
       console.log(JSON.stringify(reference));
     });
   },
   'bib-test': (filename: string) => {
     logger.debug('bib-test "%s"', filename);
-    var data = fs.readFileSync(filename, 'utf8');
+    var data = readFileSync(filename, 'utf8');
     try {
       parseBibTeXEntries(data);
     }
@@ -68,13 +68,13 @@ const cliCommands: {[index: string]: CLICommand} = {
   },
   'tex-flatten': (filename: string) => {
     logger.debug('tex-flatten "%s"', filename);
-    var data = fs.readFileSync(filename, 'utf8');
+    var data = readFileSync(filename, 'utf8');
     var node = parseNode(data);
     console.log(node.toString());
   },
   'tex-citekeys': (filename: string) => {
     logger.debug('tex-citekeys "%s"', filename);
-    var data = fs.readFileSync(filename, 'utf8');
+    var data = readFileSync(filename, 'utf8');
     var citekeys: string[] = extractCitekeys(data);
     console.log(citekeys.join('\n'));
   },
@@ -104,7 +104,7 @@ export function cli() {
     ]);
 
   var argv = yargs_parser.argv;
-  logger.level = argv.verbose ? 'debug' : 'info';
+  logger.level = argv.verbose ? Level.debug : Level.info;
 
   if (argv.help) {
     yargs_parser.showHelp();
@@ -119,6 +119,15 @@ export function cli() {
       console.error('Unrecognized command: "%s"', command);
       process.exit(1);
     }
+    process.on('SIGINT', () => {
+      console.error('Ctrl+C :: SIGINT!');
+      process.exit(130);
+    });
+    process.stdout.on('error', err => {
+      if (err.code == 'EPIPE') {
+        process.exit(0);
+      }
+    });
     filenames.forEach(cliCommand);
   }
 }

@@ -1,8 +1,8 @@
 /// <reference path="type_declarations/index.d.ts" />
 var lexing = require('lexing');
-var logger = require('loge');
+var loge_1 = require('loge');
 var yargs = require('yargs');
-var fs = require('fs');
+var fs_1 = require('fs');
 var states = require('./states');
 var models = require('./models');
 exports.BibTeXEntry = models.BibTeXEntry;
@@ -37,22 +37,22 @@ function extractCitekeys(tex) {
 exports.extractCitekeys = extractCitekeys;
 var cliCommands = {
     'bib-format': function (filename) {
-        logger.debug('bib-format "%s"', filename);
-        var data = fs.readFileSync(filename, 'utf8');
+        loge_1.logger.debug('bib-format "%s"', filename);
+        var data = fs_1.readFileSync(filename, 'utf8');
         parseBibTeXEntries(data).forEach(function (reference) {
             console.log(reference.toBibTeX());
         });
     },
     'bib-json': function (filename) {
-        logger.debug('bib-json "%s"', filename);
-        var data = fs.readFileSync(filename, 'utf8');
+        loge_1.logger.debug('bib-json "%s"', filename);
+        var data = fs_1.readFileSync(filename, 'utf8');
         parseBibTeXEntries(data).forEach(function (reference) {
             console.log(JSON.stringify(reference));
         });
     },
     'bib-test': function (filename) {
-        logger.debug('bib-test "%s"', filename);
-        var data = fs.readFileSync(filename, 'utf8');
+        loge_1.logger.debug('bib-test "%s"', filename);
+        var data = fs_1.readFileSync(filename, 'utf8');
         try {
             parseBibTeXEntries(data);
         }
@@ -61,14 +61,14 @@ var cliCommands = {
         }
     },
     'tex-flatten': function (filename) {
-        logger.debug('tex-flatten "%s"', filename);
-        var data = fs.readFileSync(filename, 'utf8');
+        loge_1.logger.debug('tex-flatten "%s"', filename);
+        var data = fs_1.readFileSync(filename, 'utf8');
         var node = parseNode(data);
         console.log(node.toString());
     },
     'tex-citekeys': function (filename) {
-        logger.debug('tex-citekeys "%s"', filename);
-        var data = fs.readFileSync(filename, 'utf8');
+        loge_1.logger.debug('tex-citekeys "%s"', filename);
+        var data = fs_1.readFileSync(filename, 'utf8');
         var citekeys = extractCitekeys(data);
         console.log(citekeys.join('\n'));
     },
@@ -96,7 +96,7 @@ function cli() {
         'verbose',
     ]);
     var argv = yargs_parser.argv;
-    logger.level = argv.verbose ? 'debug' : 'info';
+    loge_1.logger.level = argv.verbose ? loge_1.Level.debug : loge_1.Level.info;
     if (argv.help) {
         yargs_parser.showHelp();
     }
@@ -110,6 +110,15 @@ function cli() {
             console.error('Unrecognized command: "%s"', command);
             process.exit(1);
         }
+        process.on('SIGINT', function () {
+            console.error('Ctrl+C :: SIGINT!');
+            process.exit(130);
+        });
+        process.stdout.on('error', function (err) {
+            if (err.code == 'EPIPE') {
+                process.exit(0);
+            }
+        });
         filenames.forEach(cliCommand);
     }
 }

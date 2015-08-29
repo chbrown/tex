@@ -1,5 +1,5 @@
 BIN := node_modules/.bin
-DTS := node/node async/async chalk/chalk lodash/lodash mocha/mocha yargs/yargs
+DTS := mocha/mocha node/node yargs/yargs
 TYPESCRIPT := $(wildcard *.ts test/*.ts)
 
 all: $(TYPESCRIPT:%.ts=%.js)
@@ -13,8 +13,7 @@ $(BIN)/mocha $(BIN)/tsc:
 
 type_declarations/DefinitelyTyped/%:
 	mkdir -p $(@D)
-	curl -s https://raw.githubusercontent.com/chbrown/DefinitelyTyped/master/$* > $@
+	curl -s https://raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/$* > $@
 
-.PHONY: test
 test: $(BIN)/mocha
-	$(BIN)/mocha test/
+	$(BIN)/mocha tests/

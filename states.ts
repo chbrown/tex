@@ -179,6 +179,7 @@ export class BibTeXEntryCaptureState<T> extends lexing.MachineState<T, string[]>
   }
   pushBibTeXEntry() {
     throw new Error('Cannot call abstract method');
+    return undefined;
   }
 }
 
