@@ -2,6 +2,8 @@
 
 Parsers for TeX and BibTeX.
 
+The command line interface has been moved to [tex-node](https://github.com/chbrown/tex-node).
+
 
 ## Installation
 
