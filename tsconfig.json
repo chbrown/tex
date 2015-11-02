@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES5"
+  },
+  "files": [
+    "node_modules/declarations/mocha/mocha.d.ts",
+    "node_modules/declarations/node/node.d.ts",
+    "node_modules/declarations/unorm/unorm.d.ts",
+    "dom.ts",
+    "index.ts",
+    "models.ts",
+    "states.ts"
+  ]
+}

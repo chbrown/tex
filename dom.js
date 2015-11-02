@@ -3,7 +3,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var combining_characters = {
+exports.combining_characters = {
     '`': '\u0300',
     "'": '\u0301',
     '^': '\u0302',
@@ -20,7 +20,7 @@ var combining_characters = {
     'u': '\u0306',
     'v': '\u030c',
 };
-var special_characters = {
+exports.special_characters = {
     'l': '\u0142',
     'o': '\u00F8',
     'i': '\u0131',
@@ -86,16 +86,16 @@ var MacroNode = (function (_super) {
             return "\\" + this.name + body;
         }
         // flattening it is more difficult.
-        if (this.name in combining_characters) {
+        if (this.name in exports.combining_characters) {
             // the combining character goes after the character it modified
-            body += combining_characters[this.name];
+            body += exports.combining_characters[this.name];
         }
-        else if (this.name in special_characters) {
+        else if (this.name in exports.special_characters) {
             // body should be empty in these cases, but we'll append it anyway
-            body = special_characters[this.name] + body;
+            body = exports.special_characters[this.name] + body;
         }
         else if (this.name == '-') {
-            // kind of a weird place to handle hyphenation hints, I admin
+            // kind of a weird place to handle hyphenation hints, I admit
             body = '' + body;
         }
         else {

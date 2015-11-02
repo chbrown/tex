@@ -3,12 +3,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-/// <reference path="type_declarations/index.d.ts" />
-var lexing = require('lexing');
-var Rule = lexing.MachineRule;
+var lexing_1 = require('lexing');
 var models_1 = require('./models');
 var dom_1 = require('./dom');
-// all the classes below extend the lexing.MachineState base class,
+// all the classes below extend the MachineState base class,
 // and are roughly in order of inheritance / usage
 var StringCaptureState = (function (_super) {
     __extends(StringCaptureState, _super);
@@ -21,16 +19,16 @@ var StringCaptureState = (function (_super) {
         return undefined;
     };
     return StringCaptureState;
-})(lexing.MachineState);
+})(lexing_1.MachineState);
 exports.StringCaptureState = StringCaptureState;
 var STRING = (function (_super) {
     __extends(STRING, _super);
     function STRING() {
         _super.apply(this, arguments);
         this.rules = [
-            Rule(/^\\"/, this.captureMatch),
-            Rule(/^"/, this.pop),
-            Rule(/^(.|\r|\n)/, this.captureMatch),
+            lexing_1.MachineRule(/^\\"/, this.captureMatch),
+            lexing_1.MachineRule(/^"/, this.pop),
+            lexing_1.MachineRule(/^(.|\r|\n)/, this.captureMatch),
         ];
     }
     STRING.prototype.pop = function () {
@@ -45,8 +43,8 @@ var LITERAL = (function (_super) {
         _super.apply(this, arguments);
         this.rules = [
             // accept a contiguous string of anything but whitespace and commas
-            Rule(/^[^,\s]+/, this.captureMatch),
-            Rule(/^/, this.pop),
+            lexing_1.MachineRule(/^[^,\s]+/, this.captureMatch),
+            lexing_1.MachineRule(/^/, this.pop),
         ];
     }
     return LITERAL;
@@ -56,6 +54,9 @@ exports.LITERAL = LITERAL;
 TeX's special characters:
 
     # $ % & \ ^ _ { }
+
+Yeah, except \^ is a valid command, for circumflex accents.
+
 */
 var TEX = (function (_super) {
     __extends(TEX, _super);
@@ -63,11 +64,11 @@ var TEX = (function (_super) {
         _super.apply(this, arguments);
         this.value = new dom_1.ParentNode();
         this.rules = [
-            Rule(/^\\([#$%&\\^_{} ])/, this.captureText),
-            Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro),
-            Rule(/^\{/, this.captureParent),
-            Rule(/^\}/, this.pop),
-            Rule(/^([^\\{}%]+)/, this.captureText),
+            lexing_1.MachineRule(/^\\([#$%&\\_{} ])/, this.captureText),
+            lexing_1.MachineRule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro),
+            lexing_1.MachineRule(/^\{/, this.captureParent),
+            lexing_1.MachineRule(/^\}/, this.pop),
+            lexing_1.MachineRule(/^([^\\{}]+)/, this.captureText),
         ];
     }
     TEX.prototype.pop = function () {
@@ -106,7 +107,7 @@ var TEX = (function (_super) {
         return undefined;
     };
     return TEX;
-})(lexing.MachineState);
+})(lexing_1.MachineState);
 exports.TEX = TEX;
 var BIBTEX_STRING = (function (_super) {
     __extends(BIBTEX_STRING, _super);
@@ -114,10 +115,10 @@ var BIBTEX_STRING = (function (_super) {
         _super.apply(this, arguments);
         // this is a pass-through state, so no need to initialize anything
         this.rules = [
-            Rule(/^\s+/, this.ignore),
-            Rule(/^"/, this.readSTRING),
-            Rule(/^\{/, this.readTEX),
-            Rule(/^/, this.readLITERAL),
+            lexing_1.MachineRule(/^\s+/, this.ignore),
+            lexing_1.MachineRule(/^"/, this.readSTRING),
+            lexing_1.MachineRule(/^\{/, this.readTEX),
+            lexing_1.MachineRule(/^/, this.readLITERAL),
         ];
     }
     BIBTEX_STRING.prototype.readSTRING = function () {
@@ -130,29 +131,33 @@ var BIBTEX_STRING = (function (_super) {
         return this.attachState(LITERAL).read();
     };
     return BIBTEX_STRING;
-})(lexing.MachineState);
+})(lexing_1.MachineState);
 exports.BIBTEX_STRING = BIBTEX_STRING;
+/**
+Produces a [string, string] tuple of the field name/key and field value.
+*/
 var FIELD = (function (_super) {
     __extends(FIELD, _super);
     function FIELD() {
         _super.apply(this, arguments);
         this.rules = [
-            Rule(/^\s+/, this.ignore),
+            lexing_1.MachineRule(/^\s+/, this.ignore),
             // could be a citekey:
-            Rule(/^,/, this.popCiteKey),
+            lexing_1.MachineRule(/^,/, this.popCiteKey),
             // otherwise, it's a field (key + value):
-            Rule(/^=/, this.popField),
-            Rule(/^./, this.captureMatch),
+            lexing_1.MachineRule(/^=/, this.popField),
+            lexing_1.MachineRule(/^./, this.captureMatch),
         ];
     }
     FIELD.prototype.popCiteKey = function () {
         return [this.value.join(''), null];
     };
     FIELD.prototype.popField = function () {
+        var key = this.value.join('').toLowerCase();
         var bibtexString = this.attachState(BIBTEX_STRING).read();
         var normalizedString = bibtexString.replace(/\s+/g, ' ');
         // TODO: other normalizations?
-        return [this.value.join(''), normalizedString];
+        return [key, normalizedString];
     };
     return FIELD;
 })(StringCaptureState);
@@ -163,10 +168,10 @@ var FIELDS = (function (_super) {
         _super.apply(this, arguments);
         this.value = new models_1.BibTeXEntry(null, null);
         this.rules = [
-            Rule(/^\}/, this.pop),
-            Rule(/^$/, this.pop),
-            Rule(/^(\s+|,)/, this.ignore),
-            Rule(/^/, this.pushFIELD),
+            lexing_1.MachineRule(/^\}/, this.pop),
+            lexing_1.MachineRule(/^$/, this.pop),
+            lexing_1.MachineRule(/^(\s+|,)/, this.ignore),
+            lexing_1.MachineRule(/^/, this.pushFIELD),
         ];
     }
     FIELDS.prototype.pushFIELD = function () {
@@ -182,7 +187,7 @@ var FIELDS = (function (_super) {
         return undefined;
     };
     return FIELDS;
-})(lexing.MachineState);
+})(lexing_1.MachineState);
 exports.FIELDS = FIELDS;
 var BIBTEX_ENTRY = (function (_super) {
     __extends(BIBTEX_ENTRY, _super);
@@ -190,8 +195,8 @@ var BIBTEX_ENTRY = (function (_super) {
         _super.apply(this, arguments);
         // this.value is the pubtype string
         this.rules = [
-            Rule(/^\{/, this.popFIELDS),
-            Rule(/^(.|\s)/, this.captureMatch),
+            lexing_1.MachineRule(/^\{/, this.popFIELDS),
+            lexing_1.MachineRule(/^(.|\s)/, this.captureMatch),
         ];
     }
     BIBTEX_ENTRY.prototype.popFIELDS = function () {
@@ -208,13 +213,13 @@ var BibTeXEntryCaptureState = (function (_super) {
         this.value = [];
         this.rules = [
             // EOF
-            Rule(/^$/, this.pop),
+            lexing_1.MachineRule(/^$/, this.pop),
             // special entry types
-            Rule(/^@preamble\{/i, this.pushPreamble),
+            lexing_1.MachineRule(/^@preamble\{/i, this.pushPreamble),
             // reference
-            Rule(/^@/, this.pushBibTeXEntry),
+            lexing_1.MachineRule(/^@/, this.pushBibTeXEntry),
             // whitespace
-            Rule(/^(.|\s)/, this.ignore),
+            lexing_1.MachineRule(/^(.|\s)/, this.ignore),
         ];
     }
     BibTeXEntryCaptureState.prototype.pushPreamble = function () {
@@ -227,7 +232,7 @@ var BibTeXEntryCaptureState = (function (_super) {
         return undefined;
     };
     return BibTeXEntryCaptureState;
-})(lexing.MachineState);
+})(lexing_1.MachineState);
 exports.BibTeXEntryCaptureState = BibTeXEntryCaptureState;
 var BIBFILE = (function (_super) {
     __extends(BIBFILE, _super);

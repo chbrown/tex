@@ -1,4 +1,4 @@
-const combining_characters = {
+export const combining_characters = {
   '`': '\u0300',
   "'": '\u0301',
   '^': '\u0302',
@@ -17,7 +17,7 @@ const combining_characters = {
   // 't': '\u03',
 };
 
-const special_characters = {
+export const special_characters = {
   'l': '\u0142', // l with stroke: ł
   'o': '\u00F8', // o with stroke: ø
   'i': '\u0131', // dotless i: ı
@@ -81,7 +81,7 @@ export class MacroNode extends ParentNode {
       body = special_characters[this.name] + body;
     }
     else if (this.name == '-') {
-      // kind of a weird place to handle hyphenation hints, I admin
+      // kind of a weird place to handle hyphenation hints, I admit
       body = '' + body;
     }
     else {

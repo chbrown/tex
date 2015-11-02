@@ -21,17 +21,13 @@
   "license": "MIT",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "dependencies": {
-    "lexing": "^0.4.1",
-    "loge": "^1.0.1",
-    "yargs": "*"
+    "lexing": "*"
   },
   "devDependencies": {
+    "declarations": "*",
     "mocha": "*",
-    "typescript": "*",
+    "typescript": "next",
     "unorm": "*"
-  },
-  "bin": {
-    "tex-cli": "bin/tex-cli"
   },
   "scripts": {
     "test": "make test"

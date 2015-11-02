@@ -1,8 +1,7 @@
-/// <reference path="../type_declarations/index.d.ts" />
 import fs = require('fs');
 import path = require('path');
 import assert = require('assert');
-var unorm = require('unorm');
+import unorm = require('unorm');
 
 import tex = require('../index');
 

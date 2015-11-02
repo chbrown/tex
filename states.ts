@@ -1,14 +1,12 @@
-/// <reference path="type_declarations/index.d.ts" />
-import lexing = require('lexing');
-var Rule = lexing.MachineRule;
+import {MachineState, MachineRule as Rule} from 'lexing';
 
 import {BibTeXEntry} from './models';
 import {Node, TextNode, ParentNode, MacroNode} from './dom';
 
-// all the classes below extend the lexing.MachineState base class,
+// all the classes below extend the MachineState base class,
 // and are roughly in order of inheritance / usage
 
-export class StringCaptureState<T> extends lexing.MachineState<T, string[]> {
+export class StringCaptureState<T> extends MachineState<T, string[]> {
   protected value = [];
   captureMatch(matchValue: RegExpMatchArray) {
     this.value.push(matchValue[0]);
@@ -39,15 +37,18 @@ export class LITERAL extends STRING {
 TeX's special characters:
 
     # $ % & \ ^ _ { }
+
+Yeah, except \^ is a valid command, for circumflex accents.
+
 */
-export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
+export class TEX extends MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
-    Rule(/^\\([#$%&\\^_{} ])/, this.captureText), // escaped special character or space
+    Rule(/^\\([#$%&\\_{} ])/, this.captureText), // escaped special character or space
     Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
-    Rule(/^([^\\{}%]+)/, this.captureText), // a string of anything except slashes or braces or percents
+    Rule(/^([^\\{}]+)/, this.captureText), // a string of anything except slashes or braces
   ]
   pop(): ParentNode {
     // combine macros with their children, if any
@@ -87,7 +88,7 @@ export class TEX extends lexing.MachineState<ParentNode, ParentNode> {
   }
 }
 
-export class BIBTEX_STRING extends lexing.MachineState<string, any> {
+export class BIBTEX_STRING extends MachineState<string, any> {
   // this is a pass-through state, so no need to initialize anything
   rules = [
     Rule(/^\s+/, this.ignore),
@@ -106,6 +107,9 @@ export class BIBTEX_STRING extends lexing.MachineState<string, any> {
   }
 }
 
+/**
+Produces a [string, string] tuple of the field name/key and field value.
+*/
 export class FIELD extends StringCaptureState<[string, string]> {
   rules = [
     Rule(/^\s+/, this.ignore),
@@ -119,14 +123,15 @@ export class FIELD extends StringCaptureState<[string, string]> {
     return [this.value.join(''), null];
   }
   popField(): [string, string] {
+    var key = this.value.join('').toLowerCase();
     var bibtexString = this.attachState(BIBTEX_STRING).read();
     var normalizedString = bibtexString.replace(/\s+/g, ' ');
     // TODO: other normalizations?
-    return [this.value.join(''), normalizedString];
+    return [key, normalizedString];
   }
 }
 
-export class FIELDS extends lexing.MachineState<BibTeXEntry, BibTeXEntry> {
+export class FIELDS extends MachineState<BibTeXEntry, BibTeXEntry> {
   protected value = new BibTeXEntry(null, null);
   rules = [
     Rule(/^\}/, this.pop),
@@ -160,7 +165,7 @@ export class BIBTEX_ENTRY extends StringCaptureState<BibTeXEntry> {
   }
 }
 
-export class BibTeXEntryCaptureState<T> extends lexing.MachineState<T, string[]> {
+export class BibTeXEntryCaptureState<T> extends MachineState<T, string[]> {
   protected value = [];
   rules = [
     // EOF

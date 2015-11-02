@@ -1,4 +1,3 @@
-/// <reference path="../type_declarations/index.d.ts" />
 var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
