@@ -5,8 +5,8 @@ all: index.js
 $(BIN)/mocha $(BIN)/tsc:
 	npm install
 
-%.js: %.ts $(BIN)/tsc
-	$(BIN)/tsc
+%.js %.d.ts: %.ts $(BIN)/tsc
+	$(BIN)/tsc -d
 
 test: $(BIN)/mocha
-	$(BIN)/mocha tests/
+	$(BIN)/mocha --compilers js:babel-core/register tests/
