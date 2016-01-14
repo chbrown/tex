@@ -1,5 +1,9 @@
 # tex
 
+[![npm version](https://badge.fury.io/js/tex.svg)](https://www.npmjs.com/package/tex)
+[![Travis CI Build Status](https://travis-ci.org/chbrown/tex.svg)](https://travis-ci.org/chbrown/tex)
+[![Coverage Status](https://coveralls.io/repos/chbrown/tex/badge.svg)](https://coveralls.io/github/chbrown/tex)
+
 Parsers for TeX and BibTeX.
 
 The command line interface has been moved to [tex-node](https://github.com/chbrown/tex-node).
@@ -18,4 +22,4 @@ The command line interface has been moved to [tex-node](https://github.com/chbro
 
 ## License
 
-Copyright 2014-2015 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2014-2015).
+Copyright 2014-2016 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2014-2016).

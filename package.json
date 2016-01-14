@@ -22,8 +22,11 @@
   },
   "devDependencies": {
     "babel-core": "^5.0.0",
+    "coveralls": "*",
     "declarations": "*",
+    "istanbul": "*",
     "mocha": "*",
+    "mocha-lcov-reporter": "*",
     "typescript": "*",
     "unorm": "*"
   },

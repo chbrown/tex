@@ -1,8 +1,9 @@
-tests/
 dom.ts
 index.ts
-latex.tsv
-Makefile
 models.ts
 states.ts
+tests/
+coverage/
+latex.tsv
+Makefile
 tsconfig.json
