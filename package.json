@@ -24,7 +24,7 @@
     "babel-core": "^5.0.0",
     "declarations": "*",
     "mocha": "*",
-    "typescript": "next",
+    "typescript": "*",
     "unorm": "*"
   },
   "scripts": {

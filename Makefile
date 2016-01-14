@@ -1,6 +1,7 @@
 BIN := node_modules/.bin
+TYPESCRIPT := $(shell jq -r '.files[]' tsconfig.json | grep -Fv .d.ts)
 
-all: index.js
+all: $(TYPESCRIPT:%.ts=%.js)
 
 $(BIN)/mocha $(BIN)/tsc:
 	npm install
@@ -8,5 +9,5 @@ $(BIN)/mocha $(BIN)/tsc:
 %.js %.d.ts: %.ts $(BIN)/tsc
 	$(BIN)/tsc -d
 
-test: $(BIN)/mocha
+test: $(TYPESCRIPT:%.ts=%.js) $(BIN)/mocha
 	$(BIN)/mocha --compilers js:babel-core/register tests/
