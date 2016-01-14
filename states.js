@@ -65,7 +65,7 @@ var TEX = (function (_super) {
         this.value = new dom_1.ParentNode();
         this.rules = [
             lexing_1.MachineRule(/^\\([#$%&\\_{} ])/, this.captureText),
-            lexing_1.MachineRule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro),
+            lexing_1.MachineRule(/^\\([`'^"~=.@-]|[A-Za-z]+)/, this.captureMacro),
             lexing_1.MachineRule(/^\{/, this.captureParent),
             lexing_1.MachineRule(/^\}/, this.pop),
             lexing_1.MachineRule(/^([^\\{}]+)/, this.captureText),

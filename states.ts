@@ -45,7 +45,7 @@ export class TEX extends MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
   rules = [
     Rule(/^\\([#$%&\\_{} ])/, this.captureText), // escaped special character or space
-    Rule(/^\\([`'^"~=.-]|[A-Za-z]+)/, this.captureMacro), // macro name
+    Rule(/^\\([`'^"~=.@-]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
     Rule(/^\}/, this.pop),
     Rule(/^([^\\{}]+)/, this.captureText), // a string of anything except slashes or braces
