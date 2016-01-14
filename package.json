@@ -14,10 +14,7 @@
     "type": "git",
     "url": "https://github.com/chbrown/tex.git"
   },
-  "bugs": {
-    "email": "Christopher Brown <io@henrian.com>",
-    "url": "https://github.com/chbrown/tex/issues"
-  },
+  "bugs": "https://github.com/chbrown/tex/issues",
   "license": "MIT",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "dependencies": {
