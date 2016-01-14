@@ -6,9 +6,9 @@ import {Node, TextNode, ParentNode, MacroNode} from './dom';
 // all the classes below extend the MachineState base class,
 // and are roughly in order of inheritance / usage
 
-export class StringCaptureState<T> extends MachineState<T, string[]> {
+export abstract class StringCaptureState<T> extends MachineState<T, string[]> {
   protected value = [];
-  captureMatch(matchValue: RegExpMatchArray) {
+  captureMatch(matchValue: RegExpMatchArray): T {
     this.value.push(matchValue[0]);
     return undefined;
   }
@@ -165,9 +165,13 @@ export class BIBTEX_ENTRY extends StringCaptureState<BibTeXEntry> {
   }
 }
 
-export class BibTeXEntryCaptureState<T> extends MachineState<T, string[]> {
-  protected value = [];
-  rules = [
+/**
+The state can be extended to produce either a single BibTeXEntry or an array of
+BibTeXEntry instances.
+*/
+export abstract class BibTeXEntryCaptureState<T> extends MachineState<T, BibTeXEntry[]> {
+  protected value: BibTeXEntry[] = [];
+  rules: Rule<T>[] = [
     // EOF
     Rule(/^$/, this.pop),
     // special entry types
@@ -177,25 +181,28 @@ export class BibTeXEntryCaptureState<T> extends MachineState<T, string[]> {
     // whitespace
     Rule(/^(.|\s)/, this.ignore),
   ]
-  pushPreamble() {
+  pushPreamble(): T {
     var tex = this.attachState(TEX).read();
     // simply discard it
     return undefined;
   }
-  pushBibTeXEntry() {
-    throw new Error('Cannot call abstract method');
-    return undefined;
-  }
+  abstract pushBibTeXEntry(): T;
 }
 
+/**
+This state reads the input to the end and collects all BibTeXEntry instances.
+*/
 export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> {
-  pushBibTeXEntry() {
+  pushBibTeXEntry(): BibTeXEntry[] {
     var reference = this.attachState(BIBTEX_ENTRY).read();
     this.value.push(reference);
     return undefined;
   }
 }
 
+/**
+This state returns after reading the first BibTeXEntry instance.
+*/
 export class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
   pushBibTeXEntry(): BibTeXEntry {
     return this.attachState(BIBTEX_ENTRY).read();

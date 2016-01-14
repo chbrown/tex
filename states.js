@@ -206,6 +206,10 @@ var BIBTEX_ENTRY = (function (_super) {
     return BIBTEX_ENTRY;
 })(StringCaptureState);
 exports.BIBTEX_ENTRY = BIBTEX_ENTRY;
+/**
+The state can be extended to produce either a single BibTeXEntry or an array of
+BibTeXEntry instances.
+*/
 var BibTeXEntryCaptureState = (function (_super) {
     __extends(BibTeXEntryCaptureState, _super);
     function BibTeXEntryCaptureState() {
@@ -227,13 +231,12 @@ var BibTeXEntryCaptureState = (function (_super) {
         // simply discard it
         return undefined;
     };
-    BibTeXEntryCaptureState.prototype.pushBibTeXEntry = function () {
-        throw new Error('Cannot call abstract method');
-        return undefined;
-    };
     return BibTeXEntryCaptureState;
 })(lexing_1.MachineState);
 exports.BibTeXEntryCaptureState = BibTeXEntryCaptureState;
+/**
+This state reads the input to the end and collects all BibTeXEntry instances.
+*/
 var BIBFILE = (function (_super) {
     __extends(BIBFILE, _super);
     function BIBFILE() {
@@ -247,6 +250,9 @@ var BIBFILE = (function (_super) {
     return BIBFILE;
 })(BibTeXEntryCaptureState);
 exports.BIBFILE = BIBFILE;
+/**
+This state returns after reading the first BibTeXEntry instance.
+*/
 var BIBFILE_FIRST = (function (_super) {
     __extends(BIBFILE_FIRST, _super);
     function BIBFILE_FIRST() {

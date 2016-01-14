@@ -1,16 +1,16 @@
 import { MachineState, MachineRule as Rule } from 'lexing';
 import { BibTeXEntry } from './models';
 import { ParentNode } from './dom';
-export declare class StringCaptureState<T> extends MachineState<T, string[]> {
+export declare abstract class StringCaptureState<T> extends MachineState<T, string[]> {
     protected value: any[];
-    captureMatch(matchValue: RegExpMatchArray): any;
+    captureMatch(matchValue: RegExpMatchArray): T;
 }
 export declare class STRING extends StringCaptureState<string> {
-    rules: Rule<any>[];
+    rules: Rule<string>[];
     pop(): string;
 }
 export declare class LITERAL extends STRING {
-    rules: Rule<any>[];
+    rules: Rule<string>[];
 }
 /**
 TeX's special characters:
@@ -38,7 +38,7 @@ export declare class BIBTEX_STRING extends MachineState<string, any> {
 Produces a [string, string] tuple of the field name/key and field value.
 */
 export declare class FIELD extends StringCaptureState<[string, string]> {
-    rules: Rule<any>[];
+    rules: Rule<[string, string]>[];
     popCiteKey(): [string, string];
     popField(): [string, string];
 }
@@ -48,18 +48,28 @@ export declare class FIELDS extends MachineState<BibTeXEntry, BibTeXEntry> {
     pushFIELD(): any;
 }
 export declare class BIBTEX_ENTRY extends StringCaptureState<BibTeXEntry> {
-    rules: Rule<any>[];
+    rules: Rule<BibTeXEntry>[];
     popFIELDS(): BibTeXEntry;
 }
-export declare class BibTeXEntryCaptureState<T> extends MachineState<T, string[]> {
-    protected value: any[];
-    rules: Rule<any>[];
-    pushPreamble(): any;
-    pushBibTeXEntry(): any;
+/**
+The state can be extended to produce either a single BibTeXEntry or an array of
+BibTeXEntry instances.
+*/
+export declare abstract class BibTeXEntryCaptureState<T> extends MachineState<T, BibTeXEntry[]> {
+    protected value: BibTeXEntry[];
+    rules: Rule<T>[];
+    pushPreamble(): T;
+    abstract pushBibTeXEntry(): T;
 }
+/**
+This state reads the input to the end and collects all BibTeXEntry instances.
+*/
 export declare class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> {
-    pushBibTeXEntry(): any;
+    pushBibTeXEntry(): BibTeXEntry[];
 }
+/**
+This state returns after reading the first BibTeXEntry instance.
+*/
 export declare class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
     pushBibTeXEntry(): BibTeXEntry;
 }
