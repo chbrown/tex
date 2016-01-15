@@ -99,14 +99,15 @@ var STRING = (function (_super) {
 })(StringCaptureState);
 exports.STRING = STRING;
 /**
-This state consumes a contiguous string of anything but whitespace and commas.
+This state consumes a contiguous string of anything but whitespace, commas, and
+end braces.
 */
 var LITERAL = (function (_super) {
     __extends(LITERAL, _super);
     function LITERAL() {
         _super.apply(this, arguments);
         this.rules = [
-            lexing_1.MachineRule(/^[^,\s]+/, this.captureMatch),
+            lexing_1.MachineRule(/^[^,}\s]+/, this.captureMatch),
             lexing_1.MachineRule(/^/, this.pop),
         ];
     }

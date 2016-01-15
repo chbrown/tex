@@ -83,11 +83,12 @@ export class STRING extends StringCaptureState<string> {
 }
 
 /**
-This state consumes a contiguous string of anything but whitespace and commas.
+This state consumes a contiguous string of anything but whitespace, commas, and
+end braces.
 */
 export class LITERAL extends STRING {
   rules: Rule<string>[] = [
-    Rule(/^[^,\s]+/, this.captureMatch),
+    Rule(/^[^,}\s]+/, this.captureMatch),
     Rule(/^/, this.pop),
   ]
 }
