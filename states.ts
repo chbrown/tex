@@ -212,8 +212,14 @@ export class BIBTEX_ENTRY extends StringCaptureState<BibEntry> {
     let fields: {[index: string]: BibFieldValue} = {};
     this.attachState(FIELDS).read().forEach(([name, value]) => {
       if (value === null) {
-        // set citekey
-        citekey = name;
+        if (citekey === null) {
+          // set citekey
+          citekey = name;
+        }
+        else {
+          // almost certainly a parsing error if we see a second citekey
+          fields['parsing-error'] = name;
+        }
       }
       else {
         // add field

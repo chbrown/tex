@@ -230,8 +230,14 @@ var BIBTEX_ENTRY = (function (_super) {
         this.attachState(FIELDS).read().forEach(function (_a) {
             var name = _a[0], value = _a[1];
             if (value === null) {
-                // set citekey
-                citekey = name;
+                if (citekey === null) {
+                    // set citekey
+                    citekey = name;
+                }
+                else {
+                    // almost certainly a parsing error if we see a second citekey
+                    fields['parsing-error'] = name;
+                }
             }
             else {
                 // add field
