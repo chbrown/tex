@@ -1,6 +1,6 @@
 {
   "name": "tex",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Parsers for TeX and BibTeX",
   "keywords": [
     "tex",
