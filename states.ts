@@ -6,44 +6,19 @@ import {Node, TextNode, ParentNode, MacroNode} from './dom';
 // all the classes below extend the MachineState base class,
 // and are roughly in order of inheritance / usage
 
-export abstract class StringCaptureState<T> extends MachineState<T, string[]> {
-  protected value = [];
-  captureMatch(matchValue: RegExpMatchArray): T {
-    this.value.push(matchValue[0]);
-    return undefined;
-  }
-}
-
-export class STRING extends StringCaptureState<string> {
-  rules = [
-    Rule(/^\\"/, this.captureMatch),
-    Rule(/^"/, this.pop),
-    Rule(/^(.|\r|\n)/, this.captureMatch),
-  ]
-  pop(): string {
-    return this.value.join('');
-  }
-}
-
-export class LITERAL extends STRING {
-  rules = [
-    // accept a contiguous string of anything but whitespace and commas
-    Rule(/^[^,\s]+/, this.captureMatch),
-    Rule(/^/, this.pop),
-  ]
-}
-
 /**
+This state is triggered by an opening brace, {, and should return when it hits
+the matching closing brace, }.
+
 TeX's special characters:
 
     # $ % & \ ^ _ { }
 
-Yeah, except \^ is a valid command, for circumflex accents.
-
+Except \^ is a valid command, for circumflex accents.
 */
 export class TEX extends MachineState<ParentNode, ParentNode> {
   protected value = new ParentNode();
-  rules = [
+  rules: Rule<ParentNode>[] = [
     Rule(/^\\([#$%&\\_{} ])/, this.captureText), // escaped special character or space
     Rule(/^\\([`'^"~=.@-]|[A-Za-z]+)/, this.captureMacro), // macro name
     Rule(/^\{/, this.captureParent),
@@ -88,30 +63,88 @@ export class TEX extends MachineState<ParentNode, ParentNode> {
   }
 }
 
-export class BIBTEX_STRING extends MachineState<string, any> {
-  // this is a pass-through state, so no need to initialize anything
-  rules = [
-    Rule(/^\s+/, this.ignore),
-    Rule(/^"/, this.readSTRING),
-    Rule(/^\{/, this.readTEX),
-    Rule(/^/, this.readLITERAL),
+export abstract class StringCaptureState<T> extends MachineState<T, string[]> {
+  protected value: string[] = [];
+  captureMatch(matchValue: RegExpMatchArray): T {
+    this.value.push(matchValue[0]);
+    return undefined;
+  }
+}
+
+export class STRING extends StringCaptureState<string> {
+  rules: Rule<string>[] = [
+    Rule(/^\\"/, this.captureMatch),
+    Rule(/^"/, this.pop),
+    Rule(/^(.|\r|\n)/, this.captureMatch),
   ]
-  readSTRING(): string {
-    return this.attachState(STRING).read();
-  }
-  readTEX(): string {
-    return this.attachState(TEX).read().toString();
-  }
-  readLITERAL(): string {
-    return this.attachState(LITERAL).read();
+  pop(): string {
+    return this.value.join('');
   }
 }
 
 /**
-Produces a [string, string] tuple of the field name/key and field value.
+This state consumes a contiguous string of anything but whitespace and commas.
 */
-export class FIELD extends StringCaptureState<[string, string]> {
-  rules = [
+export class LITERAL extends STRING {
+  rules: Rule<string>[] = [
+    Rule(/^[^,\s]+/, this.captureMatch),
+    Rule(/^/, this.pop),
+  ]
+}
+
+/**
+Since some field values may not be completely interpretable in their local
+context, e.g., if they refer to a string variable, we cannot simply return
+a string from the FIELD_VALUE state.
+*/
+export interface BibFieldValue {
+  toString(stringVariables: {[index: string]: string}): string;
+}
+
+function createInterpolator(value: string): BibFieldValue {
+  return {
+    toString(stringVariables: {[index: string]: string}) {
+      return value.replace(/\$(\w+)/g, (match, group1) => stringVariables[group1]);
+    },
+  };
+}
+
+export class FIELD_VALUE extends MachineState<BibFieldValue, {}> {
+  // this is a pass-through state, so no need to initialize anything
+  rules: Rule<BibFieldValue>[] = [
+    Rule(/^\s+/, this.ignore),
+    Rule(/^"/, this.readSTRING),
+    Rule(/^\{/, this.readTEX),
+    Rule(/^/, this.readLITERAL),
+    // TODO: support #-concatenation
+  ]
+  readSTRING(): BibFieldValue {
+    return this.attachState(STRING).read();
+  }
+  readTEX(): BibFieldValue {
+    return this.attachState(TEX).read().toString();
+  }
+  readLITERAL(): BibFieldValue {
+    const literalString = this.attachState(LITERAL).read();
+    // literal numbers pass through
+    if (/^\d+$/.test(literalString)) {
+      return literalString;
+    }
+    // everything else is considered a single string variable
+    return createInterpolator('$' + literalString);
+  }
+}
+
+export type BibField = [string, BibFieldValue];
+
+/**
+Produces a [string, string] tuple of the field name/key and field value.
+
+The citekey is a special case, and returns a [citekey, null] tuple.
+*/
+export class FIELD extends StringCaptureState<BibField> {
+  // this.value is the field key/name
+  rules: Rule<BibField>[] = [
     Rule(/^\s+/, this.ignore),
     // could be a citekey:
     Rule(/^,/, this.popCiteKey),
@@ -119,49 +152,74 @@ export class FIELD extends StringCaptureState<[string, string]> {
     Rule(/^=/, this.popField),
     Rule(/^./, this.captureMatch),
   ]
-  popCiteKey(): [string, string] {
+  popCiteKey(): BibField {
     return [this.value.join(''), null];
   }
-  popField(): [string, string] {
+  popField(): BibField {
     var key = this.value.join('').toLowerCase();
-    var bibtexString = this.attachState(BIBTEX_STRING).read();
-    var normalizedString = bibtexString.replace(/\s+/g, ' ');
-    // TODO: other normalizations?
-    return [key, normalizedString];
+    var fieldValue = this.attachState(FIELD_VALUE).read();
+    return [key, fieldValue];
   }
 }
 
-export class FIELDS extends MachineState<BibTeXEntry, BibTeXEntry> {
-  protected value = new BibTeXEntry(null, null);
-  rules = [
+/**
+This is the outermost state while within the braces of a BibTeX entry, e.g.,
+
+    @article{ FIELDS... }
+
+It pops when reaching the closing brace or the EOF, ignores whitespace and
+commas, and transitions to the FIELD state when reaching anything else.
+*/
+export class FIELDS extends MachineState<BibField[], BibField[]> {
+  protected value: BibField[] = [];
+  rules: Rule<BibField[]>[] = [
     Rule(/^\}/, this.pop),
     Rule(/^$/, this.pop), // this happens quite a bit, apparently
     Rule(/^(\s+|,)/, this.ignore),
     Rule(/^/, this.pushFIELD),
   ]
-  pushFIELD() {
-    var fieldValue = this.attachState(FIELD).read();
-    if (fieldValue[1] === null) {
-      // set citekey
-      this.value.citekey = fieldValue[0];
-    }
-    else {
-      // add field
-      this.value.fields[fieldValue[0]] = fieldValue[1];
-    }
+  pushFIELD(): BibField[] {
+    this.value.push(this.attachState(FIELD).read());
     return undefined;
   }
 }
 
-export class BIBTEX_ENTRY extends StringCaptureState<BibTeXEntry> {
+/**
+Not quite a full BibTeXEntry instance, since the fields have not yet been
+interpolated.
+*/
+export interface BibEntry {
+  pubtype: string;
+  citekey: string;
+  fields: {[index: string]: BibFieldValue};
+}
+
+/**
+This is the outermost state while over a full BibTeX entry, entered when
+encountering a @ character which is not one of the special commands like
+@preamble or @string.
+*/
+export class BIBTEX_ENTRY extends StringCaptureState<BibEntry> {
   // this.value is the pubtype string
-  rules = [
+  rules: Rule<BibEntry>[] = [
     Rule(/^\{/, this.popFIELDS),
     Rule(/^(.|\s)/, this.captureMatch),
   ]
-  popFIELDS(): BibTeXEntry {
-    var fieldsValue = this.attachState(FIELDS).read();
-    return new BibTeXEntry(this.value.join(''), fieldsValue.citekey, fieldsValue.fields);
+  popFIELDS(): BibEntry {
+    let pubtype = this.value.join('');
+    let citekey: string = null;
+    let fields: {[index: string]: BibFieldValue} = {};
+    this.attachState(FIELDS).read().forEach(([name, value]) => {
+      if (value === null) {
+        // set citekey
+        citekey = name;
+      }
+      else {
+        // add field
+        fields[name] = value;
+      }
+    })
+    return {pubtype, citekey, fields};
   }
 }
 
@@ -171,40 +229,62 @@ BibTeXEntry instances.
 */
 export abstract class BibTeXEntryCaptureState<T> extends MachineState<T, BibTeXEntry[]> {
   protected value: BibTeXEntry[] = [];
+  protected stringVariables: {[index: string]: string} = {};
   rules: Rule<T>[] = [
     // EOF
     Rule(/^$/, this.pop),
     // special entry types
+    Rule(/^@comment\{/i, this.pushComment),
     Rule(/^@preamble\{/i, this.pushPreamble),
+    Rule(/^@string\s*\{/i, this.pushString),
     // reference
     Rule(/^@/, this.pushBibTeXEntry),
     // whitespace
     Rule(/^(.|\s)/, this.ignore),
   ]
-  pushPreamble(): T {
+  pushComment(): T {
     var tex = this.attachState(TEX).read();
     // simply discard it
     return undefined;
   }
-  abstract pushBibTeXEntry(): T;
+  pushPreamble(): T {
+    var tex = this.attachState(TEX).read();
+    // discard it
+    return undefined;
+  }
+  pushString(): T {
+    const fieldTuples = this.attachState(FIELDS).read();
+    // fieldTuples *should* have only one entry
+    const [name, value] = fieldTuples[0];
+    this.stringVariables[name] = value.toString(this.stringVariables);
+    return undefined;
+  }
+  pushBibTeXEntry(): T {
+    const {pubtype, citekey, fields: bibFields} = this.attachState(BIBTEX_ENTRY).read();
+    const fields: {[index: string]: string} = {};
+    Object.keys(bibFields).forEach(name => {
+      let fieldValueString = bibFields[name].toString(this.stringVariables);
+      let normalizedString = fieldValueString.replace(/\s+/g, ' ');
+      // TODO: other normalizations?
+      fields[name] = normalizedString;
+    });
+    const bibTeXEntry = new BibTeXEntry(pubtype, citekey, fields);
+    this.value.push(bibTeXEntry);
+    return undefined;
+  }
 }
 
 /**
 This state reads the input to the end and collects all BibTeXEntry instances.
 */
-export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> {
-  pushBibTeXEntry(): BibTeXEntry[] {
-    var reference = this.attachState(BIBTEX_ENTRY).read();
-    this.value.push(reference);
-    return undefined;
-  }
-}
+export class BIBFILE extends BibTeXEntryCaptureState<BibTeXEntry[]> { }
 
 /**
 This state returns after reading the first BibTeXEntry instance.
 */
 export class BIBFILE_FIRST extends BibTeXEntryCaptureState<BibTeXEntry> {
   pushBibTeXEntry(): BibTeXEntry {
-    return this.attachState(BIBTEX_ENTRY).read();
+    super.pushBibTeXEntry();
+    return this.value[0];
   }
 }
