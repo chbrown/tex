@@ -85,7 +85,7 @@ export class MacroNode extends ParentNode {
       body = '' + body;
     }
     else {
-      // console.error(`ignoring macro: ${this.name}`)
+      // throw new Error(`ignoring macro: ${this.name}`)
     }
     return body;
   }

@@ -32,3 +32,17 @@ export function extractCitekeys(tex: string): string[] {
   }
   return citekeys;
 }
+
+export function stringifyBibTeXEntry(bibTeXEntry: BibTeXEntry,
+                                     indent: string = '  ',
+                                     newline: string = '\n'): string {
+  var fieldLines = bibTeXEntry.fields.map(([name, value]) => `${indent}${name} = {${value}},`);
+  return `@${bibTeXEntry.pubtype}{${bibTeXEntry.citekey},${newline}${fieldLines.join(newline)}${newline}}`;
+}
+
+export function flattenBibTeXEntry(bibTeXEntry: BibTeXEntry): {[index: string]: string} {
+  const {pubtype, citekey, fields} = bibTeXEntry;
+  const object: {[index: string]: string} = {pubtype, citekey};
+  fields.forEach(([name, value]) => object[name] = value);
+  return object;
+}

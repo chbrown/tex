@@ -139,7 +139,7 @@ export class FIELD_VALUE extends MachineState<BibFieldValue, {}> {
 export type BibField = [string, BibFieldValue];
 
 /**
-Produces a [string, string] tuple of the field name/key and field value.
+Produces a [string, BibFieldValue] tuple of the field name/key and field value.
 
 The citekey is a special case, and returns a [citekey, null] tuple.
 */
@@ -189,10 +189,10 @@ export class FIELDS extends MachineState<BibField[], BibField[]> {
 Not quite a full BibTeXEntry instance, since the fields have not yet been
 interpolated.
 */
-export interface BibEntry {
+export interface UnresolvedBibTeXEntry {
   pubtype: string;
   citekey: string;
-  fields: {[index: string]: BibFieldValue};
+  fields: BibField[];
 }
 
 /**
@@ -200,16 +200,16 @@ This is the outermost state while over a full BibTeX entry, entered when
 encountering a @ character which is not one of the special commands like
 @preamble or @string.
 */
-export class BIBTEX_ENTRY extends StringCaptureState<BibEntry> {
+export class BIBTEX_ENTRY extends StringCaptureState<UnresolvedBibTeXEntry> {
   // this.value is the pubtype string
-  rules: Rule<BibEntry>[] = [
+  rules: Rule<UnresolvedBibTeXEntry>[] = [
     Rule(/^\{/, this.popFIELDS),
     Rule(/^(.|\s)/, this.captureMatch),
   ]
-  popFIELDS(): BibEntry {
-    let pubtype = this.value.join('');
+  popFIELDS(): UnresolvedBibTeXEntry {
+    const pubtype = this.value.join('');
     let citekey: string = null;
-    let fields: {[index: string]: BibFieldValue} = {};
+    const fields: [string, BibFieldValue][] = [];
     this.attachState(FIELDS).read().forEach(([name, value]) => {
       if (value === null) {
         if (citekey === null) {
@@ -218,12 +218,12 @@ export class BIBTEX_ENTRY extends StringCaptureState<BibEntry> {
         }
         else {
           // almost certainly a parsing error if we see a second citekey
-          fields['parsing-error'] = name;
+          fields.push(['parsing-error', name]);
         }
       }
       else {
         // add field
-        fields[name] = value;
+        fields.push([name, value]);
       }
     })
     return {pubtype, citekey, fields};
@@ -267,16 +267,15 @@ export abstract class BibTeXEntryCaptureState<T> extends MachineState<T, BibTeXE
     return undefined;
   }
   pushBibTeXEntry(): T {
-    const {pubtype, citekey, fields: bibFields} = this.attachState(BIBTEX_ENTRY).read();
-    const fields: {[index: string]: string} = {};
-    Object.keys(bibFields).forEach(name => {
-      let fieldValueString = bibFields[name].toString(this.stringVariables);
+    const {pubtype, citekey, fields: unresolvedFields} = this.attachState(BIBTEX_ENTRY).read();
+    const fields = unresolvedFields.map(([name, unresolvedValue]) => {
+      let fieldValueString = unresolvedValue.toString(this.stringVariables);
       let normalizedString = fieldValueString.replace(/\s+/g, ' ');
       // TODO: other normalizations?
-      fields[name] = normalizedString;
+      // why can't TypeScript generalize between [string, string] and string[]?
+      return <[string, string]>[name, normalizedString];
     });
-    const bibTeXEntry = new BibTeXEntry(pubtype, citekey, fields);
-    this.value.push(bibTeXEntry);
+    this.value.push({pubtype, citekey, fields});
     return undefined;
   }
 }
