@@ -46,3 +46,12 @@ export function flattenBibTeXEntry(bibTeXEntry: BibTeXEntry): {[index: string]: 
   fields.forEach(([name, value]) => object[name] = value);
   return object;
 }
+
+export function unflattenBibTeXEntry(object: {[index: string]: string}): BibTeXEntry {
+  const {pubtype, citekey} = object;
+  const fields: [string, string][] = [];
+  Object.keys(object).filter(key => key != 'pubtype' && key != 'citekey').forEach(key => {
+    fields.push([key, object[key]]);
+  });
+  return {pubtype, citekey, fields};
+}
