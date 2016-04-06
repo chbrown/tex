@@ -1,7 +1,9 @@
+tests/bib.js
 dom.js
 index.js
 models.js
 states.js
+tests/bib.d.ts
 dom.d.ts
 index.d.ts
 models.d.ts

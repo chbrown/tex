@@ -4,9 +4,10 @@
     "target": "ES5"
   },
   "files": [
-    "node_modules/declarations/mocha/mocha.d.ts",
+    "node_modules/declarations/mocha/mocha-node.d.ts",
     "node_modules/declarations/node/node.d.ts",
     "node_modules/declarations/unorm/unorm.d.ts",
+    "tests/bib.ts",
     "dom.ts",
     "index.ts",
     "models.ts",
