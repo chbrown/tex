@@ -28,10 +28,10 @@ export class TEX extends MachineState<ParentNode, ParentNode> {
   pop(): ParentNode {
     // combine macros with their children, if any
     // is there a better way / place to do this?
-    var children = this.value.children;
-    for (var i = 0, node: Node; (node = children[i]); i++) {
+    const children = this.value.children;
+    for (let i = 0, node: Node; (node = children[i]); i++) {
       if (node instanceof MacroNode) {
-        var nextNode: Node = children[i + 1];
+        const nextNode: Node = children[i + 1];
         if (nextNode instanceof ParentNode) {
           node.children = nextNode.children;
           // dispose of the next child
@@ -47,17 +47,17 @@ export class TEX extends MachineState<ParentNode, ParentNode> {
     return this.value;
   }
   captureText(matchValue: RegExpMatchArray) {
-    var textNode = new TextNode(matchValue[1]);
+    const textNode = new TextNode(matchValue[1]);
     this.value.children.push(textNode);
     return undefined;
   }
   captureMacro(matchValue: RegExpMatchArray) {
-    var macroNode = new MacroNode(matchValue[1], []);
+    const macroNode = new MacroNode(matchValue[1], []);
     this.value.children.push(macroNode);
     return undefined;
   }
   captureParent() {
-    var parentNode = this.attachState(TEX).read();
+    const parentNode = this.attachState(TEX).read();
     this.value.children.push(parentNode);
     return undefined;
   }
@@ -157,8 +157,8 @@ export class FIELD extends StringCaptureState<BibField> {
     return [this.value.join(''), null];
   }
   popField(): BibField {
-    var key = this.value.join('').toLowerCase();
-    var fieldValue = this.attachState(FIELD_VALUE).read();
+    const key = this.value.join('').toLowerCase();
+    const fieldValue = this.attachState(FIELD_VALUE).read();
     return [key, fieldValue];
   }
 }
@@ -250,12 +250,12 @@ export abstract class BibTeXEntryCaptureState<T> extends MachineState<T, BibTeXE
     Rule(/^(.|\s)/, this.ignore),
   ]
   pushComment(): T {
-    var tex = this.attachState(TEX).read();
+    const tex = this.attachState(TEX).read();
     // simply discard it
     return undefined;
   }
   pushPreamble(): T {
-    var tex = this.attachState(TEX).read();
+    const tex = this.attachState(TEX).read();
     // discard it
     return undefined;
   }

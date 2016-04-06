@@ -50,7 +50,7 @@ export class ParentNode {
   [].join('') === '', which is convenient because we want '' for childless nodes
   */
   toString(tex: boolean = false): string {
-    var contents = this.children.map(child => child.toString(tex)).join('');
+    const contents = this.children.map(child => child.toString(tex)).join('');
     if (tex) {
       return `{${contents}}`;
     }
@@ -66,7 +66,7 @@ export class ParentNode {
 export class MacroNode extends ParentNode {
   constructor(public name: string, children: Node[] = []) { super(children) }
   toString(tex: boolean = false): string {
-    var body = super.toString(tex);
+    let body = super.toString(tex);
     if (tex) {
       // turning it back into tex is easy
       return `\\${this.name}${body}`;
